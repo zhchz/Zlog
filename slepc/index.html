@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="google-site-verification" content="JWKXKBgMA-PwT6UVFtoe_WnlTH8jJAuNK1XVhHY_2mM">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zrzfh.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":"fasle","sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="引言 最近在计算矩阵特征值的问题上，用到了 SLEPc（Scalable Library for Eigenvalue Problem Computations），SLEPc 可用于超大稀疏矩阵特征值的快速并行计算，也可以用于其他 SVD 分解等常用矩阵计算。SLEPc 的安装依赖于其他通用科学计算库，比如 PETSc，BLAS&#x2F;LAPACK 等，环境配置稍显复杂，因此，记录环境配置过">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ubuntu 自定义路径下安装 SLEPc&#x2F;PETSc 以及 BLAS&#x2F;LAPACK 科学计算库">
+<meta property="og:url" content="https://zrzfh.github.io/Zlog/slepc/index.html">
+<meta property="og:site_name" content="Zlog">
+<meta property="og:description" content="引言 最近在计算矩阵特征值的问题上，用到了 SLEPc（Scalable Library for Eigenvalue Problem Computations），SLEPc 可用于超大稀疏矩阵特征值的快速并行计算，也可以用于其他 SVD 分解等常用矩阵计算。SLEPc 的安装依赖于其他通用科学计算库，比如 PETSc，BLAS&#x2F;LAPACK 等，环境配置稍显复杂，因此，记录环境配置过">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-03-24T05:50:27.000Z">
+<meta property="article:modified_time" content="2023-03-24T16:17:24.006Z">
+<meta property="article:author" content="zrzfh">
+<meta property="article:tag" content="Ubuntu">
+<meta property="article:tag" content="BLAS&#x2F;LAPACK">
+<meta property="article:tag" content="PETSc">
+<meta property="article:tag" content="SLEPc">
+<meta property="article:tag" content="快速矩阵计算">
+<meta property="article:tag" content="科学计算包">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://zrzfh.github.io/Zlog/slepc/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Ubuntu 自定义路径下安装 SLEPc/PETSc 以及 BLAS/LAPACK 科学计算库 | Zlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="Zlog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Zlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zrzfh.github.io/Zlog/slepc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="zrzfh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Ubuntu 自定义路径下安装 SLEPc/PETSc 以及 BLAS/LAPACK 科学计算库
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-03-24 13:50:27" itemprop="dateCreated datePublished" datetime="2023-03-24T13:50:27+08:00">2023-03-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-03-25 00:17:24" itemprop="dateModified" datetime="2023-03-25T00:17:24+08:00">2023-03-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index"><span itemprop="name">环境配置</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="引言">引言</h1>
+<p>最近在计算矩阵特征值的问题上，用到了 SLEPc（Scalable Library for
+Eigenvalue Problem Computations），SLEPc
+可用于超大稀疏矩阵特征值的快速并行计算，也可以用于其他 SVD
+分解等常用矩阵计算。SLEPc 的安装依赖于其他通用科学计算库，比如
+PETSc，BLAS/LAPACK
+等，环境配置稍显复杂，因此，记录环境配置过程，以备后用。</p>
+<span id="more"></span>
+<h1 id="依赖关系">依赖关系</h1>
+<p>SLEPc 是一个开源项目，可以在这里找到 <a
+target="_blank" rel="noopener" href="https://github.com/firedrakeproject/slepc/">https://github.com/firedrakeproject/slepc/</a>
+，有非常详细的使用说明（documentation），使用友好。SLEPc 依赖于
+PETSc，而 PETSc 依赖于 BLAS/LAPACK，因此，我们需要一一安装依赖项。</p>
+<h1 id="blaslapack">BLAS/LAPACK</h1>
+<p>BLAS（Basic Linear Algebra
+Subprograms）定义了一系列矩阵、向量之间的基础运算的接口标准（API），Netlib
+实现了 BLAS 的这些接口，得到的库也叫 BLAS。以 BLAS 为基础，Netlib
+增加了更多高级的矩阵、向量运算，如分解、求逆、特征值等，并且实现了这些高级接口，于是有了
+LAPACK（Linear Algebra PackAage）。这两个库都是用 Fortran
+语言开发的（另外插一句，CBLAS 和 CLAPACK 是 BLAS 和 LAPACK 的 C
+语言接口）。</p>
+<p>默认安装方式 <a href="#refer-anchor-1"><sup>[1]</sup></a>
+为（没有试过... 应该不会有什么问题...） <figure class="highlight q"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-<span class="built_in">get</span> install libblas-<span class="built_in">dev</span></span><br><span class="line">sudo apt-<span class="built_in">get</span> install liblapack-<span class="built_in">dev</span></span><br></pre></td></tr></table></figure> 默认位置在
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="regexp">/usr/</span>lib<span class="regexp">/x86_64-linux-gnu/</span>libblas.a </span><br><span class="line"><span class="regexp">/usr/</span>lib<span class="regexp">/x86_64-linux-gnu/</span>libblas.so </span><br><span class="line"><span class="regexp">/usr/</span>local<span class="regexp">/lib/</span>libblas.a</span><br><span class="line"></span><br><span class="line"><span class="regexp">/usr/</span>lib<span class="regexp">/x86_64-linux-gnu/</span>liblapack.so </span><br><span class="line"><span class="regexp">/usr/</span>lib<span class="regexp">/x86_64-linux-gnu/</span>liblapack.a</span><br><span class="line"><span class="regexp">/usr/</span>local<span class="regexp">/lib/</span>liblapack.a</span><br></pre></td></tr></table></figure></p>
+<p>因为我需要安装在自定义路径中，所以下面进行一些自定义配置，如果不需要自定义路径，可以直接跳到
+<a href="#title-anchor-PETSc">下一节</a>。</p>
+<h2 id="安装-fortran-语言的编译器-gfortran">安装 Fortran 语言的编译器
+gfortran</h2>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-<span class="built_in">get</span> install gfortran</span><br></pre></td></tr></table></figure>
+<h2 id="安装-fftw-2">安装 FFTW <a
+href="#refer-anchor-2"><sup>[2]</sup></a></h2>
+<p><strong>i. 下载 FFTW</strong></p>
+<p><a
+target="_blank" rel="noopener" href="http://www.fftw.org/download.html">http://www.fftw.org/download.html</a></p>
+<p><strong>ii. 安装 FFTW</strong> <figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf fftw-3.3.10.tar.gz</span><br><span class="line"><span class="keyword">cd</span> fftw-3.3.10/</span><br><span class="line"><span class="comment"># 下面尽可能多的使用了指令集优化，不需要的化可以去掉相应的选项 </span></span><br><span class="line"><span class="comment"># cat /proc/cpuinfo 可以查看 cpu 支持的指令集 </span></span><br><span class="line"><span class="string">./configure</span> <span class="params">--prefix=/your/path/to/install</span> <span class="params">--enable-shared</span> <span class="params">--enable-static</span> <span class="params">--enable-single</span> <span class="params">--enable-sse</span> <span class="params">--enable-sse2</span> <span class="params">--enable-avx</span> <span class="params">--enable-avx2</span> <span class="params">--enable-fma</span> <span class="params">--enable-mpi</span> <span class="params">--enable-threads</span> <span class="params">--enable-openmp</span> </span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+<!-- ./configure --prefix=/opt/hmi_depends/algorithm_depends/fftw --enable-shared --enable-static --enable-single --enable-sse --enable-sse2 --enable-avx --enable-avx2 --enable-fma --enable-mpi --enable-threads --enable-openmp  --></p>
+<h2 id="安装-blaslapack-2">安装 BLAS/LAPACK <a
+href="#refer-anchor-2"><sup>[2]</sup></a></h2>
+<p><strong>i. 确保 cmake 和 gfortran 已经安装 </strong></p>
+<p><strong>ii. 下载 LAPACK</strong></p>
+<p><a
+target="_blank" rel="noopener" href="https://netlib.org/lapack/">https://netlib.org/lapack/</a></p>
+<p>幸运的是 LAPACK 中已经包含了 BLAS，所以不用重复下载。</p>
+<p><strong>iii. 安装 LAPACK</strong></p>
+<p>解压 <figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">tar</span> -zxvf lapack-<span class="number">3</span>.<span class="number">11</span>.tar.gz</span><br><span class="line"><span class="attribute">cd</span> lapack-<span class="number">3</span>.<span class="number">11</span></span><br></pre></td></tr></table></figure> 解压之后，它里面会含有 BLAS，CBLAS，LAPACKE
+等文件夹。新建 <code>make.inc</code> 文件 <figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cp</span> <span class="keyword">make</span>.inc.example <span class="keyword">make</span>.inc</span><br></pre></td></tr></table></figure> 如果是使用
+gfortran，则无须更改 <code>make.inc</code>
+里的内容，否则需要根据系统环境和编译器修改文件里对应的选项。</p>
+<p>LAPACK 依赖 BLAS，在编译 LAPACK 前需要编译 BLAS
+包，而默认并不编译，因此，需要修改一下 <code>makefile</code>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">gedit</span> Makefile</span><br><span class="line"><span class="comment"># or </span></span><br><span class="line"><span class="comment"># vim Makefile</span></span><br></pre></td></tr></table></figure> 将第 <em>12~13</em> 行 <figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">lib</span>: <span class="title">lapacklib</span> <span class="title">tmglib</span></span></span><br><span class="line"><span class="comment">#lib: blaslib variants lapacklib tmglib</span></span><br></pre></td></tr></table></figure> 修改为 <figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#lib: lapacklib tmglib</span></span><br><span class="line"><span class="symbol">lib:</span> blaslib variants lapacklib tmglib</span><br></pre></td></tr></table></figure>
+然后，进行编译 <figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">make</span></span><br></pre></td></tr></table></figure> <strong>【重要】</strong> 接下来，进入
+<code>LAPACKE</code> 目录并再次编译 <figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cd</span> LAPACKE</span><br><span class="line"><span class="keyword">make</span></span><br></pre></td></tr></table></figure> 在
+<code>lapack-3.11</code>
+目录下生成如下四个静态库，<code>liblapack.a, liblapacke.a, librefblas.a, libtmglib.a</code>
+则表示编译成功，将这四个静态库拷贝到自定义路径下的 <code>lib</code>
+路径，同时将 <code>LAPACKE/include</code>
+目录下的头文件拷贝到自定义路径下的 <code>include</code> 目录。</p>
+<h1 id="安装-mpich">安装 MPICH</h1>
+<p>PETSc 还依赖于 MPICH。</p>
+<p><strong>i. 下载 MPICH</strong></p>
+<p><a
+target="_blank" rel="noopener" href="https://www.mpich.org/downloads/">https://www.mpich.org/downloads/</a></p>
+<p><strong>ii. 安装 MPICH</strong></p>
+<p>解压并编译 <figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf mpich-<span class="number">4.1</span>.<span class="number">1</span>.tar.gz</span><br><span class="line">cd mpich-<span class="number">4.1</span>.<span class="number">1</span></span><br><span class="line">.<span class="regexp">/configure --prefix=/y</span>our<span class="regexp">/path/</span>to/install</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure></p>
+<h1 id="petsc-和-slepc-版本">PETSc 和 SLEPc 版本</h1>
+<p>由于 SLEPc 是基于 PETSc 的，所以需要先安装 PETSc，再安装
+SLEPc。与此同时，要确保所下载的 PETSc 和 SLEPc 的版本能够符合 <a
+target="_blank" rel="noopener" href="https://slepc.upv.es/download/changes.htm">版本对应表</a>。</p>
+<h1 id="安装-petsc">安装 PETSc</h1>
+<div id="title-anchor-PETSc">
+
+</div>
+<p><strong>i. 下载 PETSc</strong></p>
+<p><a
+target="_blank" rel="noopener" href="https://petsc.org/release/install/download/">https://petsc.org/release/install/download/</a></p>
+<p><strong>ii. 安装 PETSc</strong> <figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf petsc-<span class="number">3.18</span>.<span class="number">5</span>.tar.gz</span><br><span class="line">cd petsc-<span class="number">3.18</span>.<span class="number">5</span></span><br><span class="line">.<span class="regexp">/configure --with-shared-libraries=0 --with-blas-lib=/y</span>our<span class="regexp">/blas/</span>path<span class="regexp">/to/</span>librefblas.a --with-lapack-lib=<span class="regexp">/your/</span>blas<span class="regexp">/path/</span>to<span class="regexp">/liblapack.a --with-mpi-dir=/y</span>our<span class="regexp">/blas/</span>path<span class="regexp">/to/m</span>pi</span><br><span class="line">make check all</span><br></pre></td></tr></table></figure> 如果以后需要使用 PETSc
+的库，可将 <code>include</code> 目录下的所有文件拷贝到安装目录
+<code>include</code> 下，将
+<code>arch-linux-c-debug/lib/libpetsc.a</code> 拷贝到安装目录
+<code>lib</code> 下。</p>
+<!-- ./configure --prefix=/opt/hmi_depends/algorithm_depends --with-shared-libraries=0 --with-blas-lib=/opt/hmi_depends/algorithm_depends/libs/lapack/librefblas.a --with-lapack-lib=/opt/hmi_depends/algorithm_depends/libs/lapack/liblapack.a --with-mpi-dir=/opt/hmi_depends/algorithm_depends/mpi -->
+<h1 id="安装-slepc">安装 SLEPc</h1>
+<p><strong>i. 下载 SLEPc</strong></p>
+<p><a
+target="_blank" rel="noopener" href="https://slepc.upv.es/download/">https://slepc.upv.es/download/</a></p>
+<p><strong>ii. 安装 SLEPc</strong> <figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf slepc-3.18.5.tar.gz</span><br><span class="line">cd petsc-3.18.5</span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> <span class="attribute">PETSC_DIR</span>=/path/to/  # 此处应为 PETSc 解压并且编译过的路径，如我这里为 petsc-3.18.5 的绝对路径 </span><br><span class="line"><span class="built_in">export</span> <span class="attribute">PETSC_ARCH</span>=/path/to/arch/of/petsc  # 此处应为 PETSc 编译时确定的当前编译版本的库的绝对路径，可以在 petsc-3.18.5 路径下找到 arch 开头的文件夹，如我这里为 arch-linux-c-<span class="built_in">debug</span></span><br><span class="line"><span class="built_in">export</span> <span class="attribute">SLEPC_DIR</span>=/path/to/slepc-3.18.2  # 此处应为解压的 SLEPc 的路径 </span><br><span class="line"></span><br><span class="line">./configure</span><br><span class="line">make</span><br><span class="line">check</span><br></pre></td></tr></table></figure> 最后将
+<code>include</code> 目录下的所有文件拷贝到安装目录 <code>include</code>
+下，将 <code>arch-linux-c-debug/lib/libslepc.a</code> 拷贝到安装目录
+<code>lib</code> 下。</p>
+<!-- ./configure --with --with-blas-lib=/opt/hmi_depends/algorithm_depends/libs/lapack/librefblas.a --with-lapack-lib=/opt/hmi_depends/algorithm_depends/libs/lapack/liblapack.a --with-mpi-dir=/opt/hmi_depends/algorithm_depends/mpi -->
+<h1 id="参考">参考</h1>
+<div id="refer-anchor-1">
+
+</div>
+<ul>
+<li>[1] <span class="exturl" data-url="aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC80NDA5NTkyODcv">Ubuntu
+BLAS/LAPACK 安装<i class="fa fa-external-link-alt"></i></span>
+<div id="refer-anchor-2">
+
+</div></li>
+<li>[2] <span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vYmFieWNsYXNzL3AvMTYzNTg1ODkuaHRtbA==">非
+ROOT 路径安装 BLAS/LAPACK<i class="fa fa-external-link-alt"></i></span></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+
+        <div class="reward-container">
+  <div>请我喝杯咖啡吧。</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/weixin.jpg" alt="zrzfh 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/zhifubao.jpg" alt="zrzfh 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Ubuntu/" rel="tag"># Ubuntu</a>
+              <a href="/tags/BLAS-LAPACK/" rel="tag"># BLAS/LAPACK</a>
+              <a href="/tags/PETSc/" rel="tag"># PETSc</a>
+              <a href="/tags/SLEPc/" rel="tag"># SLEPc</a>
+              <a href="/tags/%E5%BF%AB%E9%80%9F%E7%9F%A9%E9%98%B5%E8%AE%A1%E7%AE%97/" rel="tag"># 快速矩阵计算</a>
+              <a href="/tags/%E7%A7%91%E5%AD%A6%E8%AE%A1%E7%AE%97%E5%8C%85/" rel="tag"># 科学计算包</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/IIC/" rel="prev" title="Invariant Information Clustering (IIC) 无监督的图像分类和分割">
+      <i class="fa fa-chevron-left"></i> Invariant Information Clustering (IIC) 无监督的图像分类和分割
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB"><span class="nav-number">2.</span> <span class="nav-text">依赖关系</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#blaslapack"><span class="nav-number">3.</span> <span class="nav-text">BLAS&#x2F;LAPACK</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-fortran-%E8%AF%AD%E8%A8%80%E7%9A%84%E7%BC%96%E8%AF%91%E5%99%A8-gfortran"><span class="nav-number">3.1.</span> <span class="nav-text">安装 Fortran 语言的编译器
+gfortran</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-fftw-2"><span class="nav-number">3.2.</span> <span class="nav-text">安装 FFTW [2]</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-blaslapack-2"><span class="nav-number">3.3.</span> <span class="nav-text">安装 BLAS&#x2F;LAPACK [2]</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-mpich"><span class="nav-number">4.</span> <span class="nav-text">安装 MPICH</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#petsc-%E5%92%8C-slepc-%E7%89%88%E6%9C%AC"><span class="nav-number">5.</span> <span class="nav-text">PETSc 和 SLEPc 版本</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-petsc"><span class="nav-number">6.</span> <span class="nav-text">安装 PETSc</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-slepc"><span class="nav-number">7.</span> <span class="nav-text">安装 SLEPc</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zrzfh"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">zrzfh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnpob3V6aGVuaHVpXzY4QG91dGxvb2suY29t" title="E-Mail → mailto:zhouzhenhui_68@outlook.com"><i class="fa fa-envelope fa-fw"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zrzfh</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">4k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">14 分钟</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+  <script src="//cdn.jsdelivr.net/npm/quicklink@1/dist/quicklink.umd.js"></script>
+  <script>
+      window.addEventListener('load', () => {
+      quicklink({
+        timeout : 3000,
+        priority: true,
+        ignores : [uri => uri.includes('#'),uri => uri === 'https://zrzfh.github.io/Zlog/slepc/',]
+      });
+      });
+  </script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '945e4cf328a1869624aa',
+      clientSecret: 'd7bb1069bb0b644617a97d281490f2e3c67d120e',
+      repo        : 'comments',
+      owner       : 'zrzfh',
+      admin       : ['zrzfh'],
+      id          : 'a06fbf8331d27df2785cd7f64f375563',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>
