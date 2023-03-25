@@ -2,7 +2,7 @@
 <search>
   <entry>
     <title>Invariant Information Clustering (IIC) 无监督的图像分类和分割</title>
-    <url>/IIC/</url>
+    <url>/Zlog/IIC/</url>
     <content><![CDATA[<h1 id="引言">引言</h1>
 <p>2019 年，牛津大学提出了一种无监督，不依赖标签的聚类方法：Invariant
 Information Clustering (IIC)，即根据给定数据对（Data
@@ -248,8 +248,15 @@ GPU ... 挖个坑，优化一下代码的使用和环境配置...</p>
       </tags>
   </entry>
   <entry>
+    <title>序</title>
+    <url>/Zlog/%E5%BA%8F/</url>
+    <content><![CDATA[<p>不积跬步，无以至千里。 <span id="more"></span>
+学习很重要，思考很重要，整理同样也很重要。因此，本博客专门用于学习过程中的整理和记录，便于温故而知新。</p>
+]]></content>
+  </entry>
+  <entry>
     <title>Ubuntu 自定义路径下安装 SLEPc/PETSc 以及 BLAS/LAPACK 科学计算库</title>
-    <url>/slepc/</url>
+    <url>/Zlog/slepc/</url>
     <content><![CDATA[<h1 id="引言">引言</h1>
 <p>最近在计算矩阵特征值的问题上，用到了 SLEPc（Scalable Library for
 Eigenvalue Problem Computations），SLEPc
@@ -366,12 +373,5 @@ ROOT 路径安装 BLAS/LAPACK<i class="fa fa-external-link-alt"></i></span></li>
         <tag>快速矩阵计算</tag>
         <tag>科学计算包</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>序</title>
-    <url>/%E5%BA%8F/</url>
-    <content><![CDATA[<p>不积跬步，无以至千里。 <span id="more"></span>
-学习很重要，思考很重要，整理同样也很重要。因此，本博客专门用于学习过程中的整理和记录，便于温故而知新。</p>
-]]></content>
   </entry>
 </search>
