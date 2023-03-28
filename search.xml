@@ -292,7 +292,8 @@ href="#refer-anchor-2"><sup>[2]</sup></a></h2>
 <p><a
 href="http://www.fftw.org/download.html">http://www.fftw.org/download.html</a></p>
 <p><strong>ii. 安装 FFTW</strong> <figure class="highlight jboss-cli"><table><tr><td class="code"><pre><span class="line">tar -zxvf fftw-3.3.10.tar.gz</span><br><span class="line"><span class="keyword">cd</span> fftw-3.3.10/</span><br><span class="line"><span class="comment"># 下面尽可能多的使用了指令集优化，不需要的化可以去掉相应的选项 </span></span><br><span class="line"><span class="comment"># cat /proc/cpuinfo 可以查看 cpu 支持的指令集 </span></span><br><span class="line"><span class="string">./configure</span> <span class="params">--prefix=/your/path/to/install</span> <span class="params">--enable-shared</span> <span class="params">--enable-static</span> <span class="params">--enable-single</span> <span class="params">--enable-sse</span> <span class="params">--enable-sse2</span> <span class="params">--enable-avx</span> <span class="params">--enable-avx2</span> <span class="params">--enable-fma</span> <span class="params">--enable-mpi</span> <span class="params">--enable-threads</span> <span class="params">--enable-openmp</span> </span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
-<!-- ./configure --prefix=/opt/hmi_depends/algorithm_depends/fftw --enable-shared --enable-static --enable-single --enable-sse --enable-sse2 --enable-avx --enable-avx2 --enable-fma --enable-mpi --enable-threads --enable-openmp  --></p>
+<!-- * 如果 prefix 所指定的安装目录下的目录结构和自定义工程外部依赖路径下的自定义结构不一样，可以将安装目录下的 `include` 路径下的所有文件和 `lib` 路径下的所有文件分别拷贝到自定义工程外部依赖路径中的对应位置。 --></p>
+<!-- ./configure --prefix=/opt/hmi_depends/algorithm_depends/fftw --enable-shared --enable-static --enable-single --enable-sse --enable-sse2 --enable-avx --enable-avx2 --enable-fma --enable-mpi --enable-threads --enable-openmp  -->
 <h2 id="安装-blaslapack-2">安装 BLAS/LAPACK <a
 href="#refer-anchor-2"><sup>[2]</sup></a></h2>
 <p><strong>i. 确保 cmake 和 gfortran 已经安装 </strong></p>
@@ -321,7 +322,14 @@ gfortran，则无须更改 <code>make.inc</code>
 <p><a
 href="https://www.mpich.org/downloads/">https://www.mpich.org/downloads/</a></p>
 <p><strong>ii. 安装 MPICH</strong></p>
-<p>解压并编译 <figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">tar -zxvf mpich-<span class="number">4.1</span>.<span class="number">1</span>.tar.gz</span><br><span class="line">cd mpich-<span class="number">4.1</span>.<span class="number">1</span></span><br><span class="line">.<span class="regexp">/configure --prefix=/y</span>our<span class="regexp">/path/</span>to/install</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure></p>
+<p>一般情况使用默认安装模式就可以了，如果需要自定义安装，可以查看 <a
+href="https://github.com/pmodels/mpich">这里</a>。
+以下为默认安装的方式。</p>
+<p>解压 <figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">tar</span> -zxvf mpich-<span class="number">4</span>.<span class="number">1</span>.<span class="number">1</span>.tar.gz</span><br><span class="line"><span class="attribute">cd</span> mpich-<span class="number">4</span>.<span class="number">1</span>.<span class="number">1</span></span><br></pre></td></tr></table></figure> 编译 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./configure --prefix=/your/path/to/install 2&gt;&amp;1 | <span class="built_in">tee</span> c.txt</span><br><span class="line">make 2&gt;&amp;1 | <span class="built_in">tee</span> m.txt</span><br><span class="line">make install 2&gt;&amp;1 | <span class="built_in">tee</span> mi.txt</span><br></pre></td></tr></table></figure> 添加环境变量，打开
+<code>~/.bashrc</code>，添加如下命令并重新打开 shell <figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">export PATH=<span class="regexp">/your/</span>path<span class="regexp">/to/i</span>nstall/bin:<span class="variable">$PATH</span>;</span><br></pre></td></tr></table></figure>
+检查，如果一切正常，下面两个命令会输出你指定的安装路径
+<code>/your/path/to/install/bin</code>。 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">which</span> mpicc</span><br><span class="line"><span class="built_in">which</span> mpiexec</span><br></pre></td></tr></table></figure> 本地测试和结果
+<figure class="highlight vhdl"><table><tr><td class="code"><pre><span class="line"># <span class="keyword">to</span> run the CPI example <span class="keyword">with</span> <span class="symbol">&#x27;n</span>&#x27; processes <span class="keyword">on</span> your local machine</span><br><span class="line">mpiexec -n &lt;number&gt; ./examples/cpi</span><br><span class="line"></span><br><span class="line"># <span class="keyword">if</span> successfully installed, the outout will like this:</span><br><span class="line"># <span class="keyword">Process</span> <span class="number">0</span> <span class="keyword">of</span> <span class="number">2</span> <span class="keyword">is</span> <span class="keyword">on</span> adt</span><br><span class="line"># <span class="keyword">Process</span> <span class="number">1</span> <span class="keyword">of</span> <span class="number">2</span> <span class="keyword">is</span> <span class="keyword">on</span> adt</span><br><span class="line"># pi <span class="keyword">is</span> approximately <span class="number">3.1415926544231318</span>, <span class="literal">Error</span> <span class="keyword">is</span> <span class="number">0.0000000008333387</span></span><br><span class="line"># wall clock <span class="built_in">time</span> = <span class="number">0.001997</span></span><br></pre></td></tr></table></figure></p>
 <h1 id="petsc-和-slepc-版本">PETSc 和 SLEPc 版本</h1>
 <p>由于 SLEPc 是基于 PETSc 的，所以需要先安装 PETSc，再安装
 SLEPc。与此同时，要确保所下载的 PETSc 和 SLEPc 的版本能够符合 <a
@@ -333,21 +341,48 @@ href="https://slepc.upv.es/download/changes.htm">版本对应表</a>。</p>
 <p><strong>i. 下载 PETSc</strong></p>
 <p><a
 href="https://petsc.org/release/install/download/">https://petsc.org/release/install/download/</a></p>
-<p><strong>ii. 安装 PETSc</strong> <figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">tar -zxvf petsc-<span class="number">3.18</span>.<span class="number">5</span>.tar.gz</span><br><span class="line">cd petsc-<span class="number">3.18</span>.<span class="number">5</span></span><br><span class="line">.<span class="regexp">/configure --with-shared-libraries=0 --with-blas-lib=/y</span>our<span class="regexp">/blas/</span>path<span class="regexp">/to/</span>librefblas.a --with-lapack-lib=<span class="regexp">/your/</span>blas<span class="regexp">/path/</span>to<span class="regexp">/liblapack.a --with-mpi-dir=/y</span>our<span class="regexp">/blas/</span>path<span class="regexp">/to/m</span>pi</span><br><span class="line">make check all</span><br></pre></td></tr></table></figure> 如果以后需要使用 PETSc
-的库，可将 <code>include</code> 目录下的所有文件拷贝到安装目录
-<code>include</code> 下，将
+<p><strong>ii. 安装 PETSc</strong> <figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">tar -zxvf petsc-<span class="number">3.18</span>.<span class="number">5</span>.tar.gz</span><br><span class="line">cd petsc-<span class="number">3.18</span>.<span class="number">5</span></span><br><span class="line">.<span class="regexp">/configure --with-shared-libraries=0 --with-blas-lib=/y</span>our<span class="regexp">/path/</span>to<span class="regexp">/librefblas.a --with-lapack-lib=/y</span>our<span class="regexp">/path/</span>to<span class="regexp">/liblapack.a --with-mpi-dir=/y</span>our<span class="regexp">/path/</span>to/mpi</span><br><span class="line">make check all</span><br></pre></td></tr></table></figure> 需要使用 PETSc 库，将
+<code>include</code> 目录下的所有文件拷贝到安装目录 <code>include</code>
+下指定位置，同时将 <code>arch-linux-c-debug/include</code>
+目录下的所有头文件拷贝到安装目录 <code>include</code> 下指定位置，将
 <code>arch-linux-c-debug/lib/libpetsc.a</code> 拷贝到安装目录
-<code>lib</code> 下。</p>
-<!-- ./configure --prefix=/opt/hmi_depends/algorithm_depends --with-shared-libraries=0 --with-blas-lib=/opt/hmi_depends/algorithm_depends/libs/lapack/librefblas.a --with-lapack-lib=/opt/hmi_depends/algorithm_depends/libs/lapack/liblapack.a --with-mpi-dir=/opt/hmi_depends/algorithm_depends/mpi -->
+<code>lib</code> 下指定位置。</p>
+<!-- ./configure --prefix=/opt/hmi_depends/algorithm_depends --with-shared-libraries=0 --with-blas-lib=/opt/hmi_depends/algorithm_depends/libs/lapack/librefblas.a --with-lapack-lib=/opt/hmi_depends/algorithm_depends/libs/lapack/liblapack.a --with-mpi-dir=/opt/hmi_depends/mpich -->
 <h1 id="安装-slepc">安装 SLEPc</h1>
 <p><strong>i. 下载 SLEPc</strong></p>
 <p><a
 href="https://slepc.upv.es/download/">https://slepc.upv.es/download/</a></p>
-<p><strong>ii. 安装 SLEPc</strong> <figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">tar -zxvf slepc-3.18.5.tar.gz</span><br><span class="line">cd petsc-3.18.5</span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> <span class="attribute">PETSC_DIR</span>=/path/to/  # 此处应为 PETSc 解压并且编译过的路径，如我这里为 petsc-3.18.5 的绝对路径 </span><br><span class="line"><span class="built_in">export</span> <span class="attribute">PETSC_ARCH</span>=/path/to/arch/of/petsc  # 此处应为 PETSc 编译时确定的当前编译版本的库的绝对路径，可以在 petsc-3.18.5 路径下找到 arch 开头的文件夹，如我这里为 arch-linux-c-<span class="built_in">debug</span></span><br><span class="line"><span class="built_in">export</span> <span class="attribute">SLEPC_DIR</span>=/path/to/slepc-3.18.2  # 此处应为解压的 SLEPc 的路径 </span><br><span class="line"></span><br><span class="line">./configure</span><br><span class="line">make</span><br><span class="line">check</span><br></pre></td></tr></table></figure> 最后将
+<p><strong>ii. 安装 SLEPc</strong> <figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">tar -zxvf slepc-3.18.3.tar.gz</span><br><span class="line">cd slepc-3.18.3</span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> <span class="attribute">PETSC_DIR</span>=/path/to/petsc-3.18.5  # 此处应为 PETSc 解压并且编译过的路径，如我这里为 petsc-3.18.5 的绝对路径 </span><br><span class="line"><span class="built_in">export</span> <span class="attribute">PETSC_ARCH</span>=arch/of/petsc  # 此处应为 PETSc 编译时确定的当前编译版本的库的绝对路径，可以在 petsc-3.18.5 路径下找到 arch 开头的文件夹，如我这里为 arch-linux-c-<span class="built_in">debug</span></span><br><span class="line"><span class="built_in">export</span> <span class="attribute">SLEPC_DIR</span>=/path/to/slepc-3.18.3  # 此处应为解压的 SLEPc 的路径 </span><br><span class="line"></span><br><span class="line">./configure</span><br><span class="line">make check all</span><br></pre></td></tr></table></figure> 最后将
 <code>include</code> 目录下的所有文件拷贝到安装目录 <code>include</code>
-下，将 <code>arch-linux-c-debug/lib/libslepc.a</code> 拷贝到安装目录
-<code>lib</code> 下。</p>
-<!-- ./configure --with --with-blas-lib=/opt/hmi_depends/algorithm_depends/libs/lapack/librefblas.a --with-lapack-lib=/opt/hmi_depends/algorithm_depends/libs/lapack/liblapack.a --with-mpi-dir=/opt/hmi_depends/algorithm_depends/mpi -->
+下指定位置，<strong>【重要】</strong> 同时，将
+<code>arch-linux-c-debug/include/slepcconf.h</code> 拷贝到安装目录
+<code>include</code> 下指定位置。将
+<code>arch-linux-c-debug/lib/libslepc.a</code> 拷贝到安装目录
+<code>lib</code> 下指定位置。</p>
+<!-- export PETSC_DIR=/home/adt/slepc/petsc-3.18.5
+export PETSC_ARCH=arch-linux-c-debug
+export SLEPC_DIR=/home/adt/slepc/slepc-3.18.3  -->
+<h1 id="可能遇到的问题">可能遇到的问题</h1>
+<p>在使用 SLEPc 时，编译工程的过程中，需要添加的头文件路径有
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">...<span class="regexp">/mpich/i</span>nclude</span><br><span class="line">...<span class="regexp">/include/</span>petsc</span><br><span class="line">...<span class="regexp">/include/</span>slepc</span><br><span class="line">...<span class="regexp">/include/</span>fftw</span><br><span class="line">...<span class="regexp">/include/</span>lapack</span><br><span class="line"></span><br></pre></td></tr></table></figure> 需要链接的库有 <figure class="highlight stylus"><table><tr><td class="code"><pre><span class="line">libslepc<span class="selector-class">.a</span></span><br><span class="line">libpetsc<span class="selector-class">.a</span></span><br><span class="line">libmpi<span class="selector-class">.a</span></span><br><span class="line">libmpicxx<span class="selector-class">.a</span></span><br><span class="line">libmpifort<span class="selector-class">.a</span></span><br><span class="line">liblapack<span class="selector-class">.a</span></span><br><span class="line">liblapacke<span class="selector-class">.a</span></span><br><span class="line">librefblas<span class="selector-class">.a</span></span><br><span class="line">libtmglib<span class="selector-class">.a</span></span><br><span class="line">libfftw3f<span class="selector-class">.a</span></span><br><span class="line">libfftw3f_mpi<span class="selector-class">.a</span></span><br><span class="line">libfftw3f_omp<span class="selector-class">.a</span></span><br><span class="line">libfftw3f_threads.a</span><br></pre></td></tr></table></figure></p>
+<p>如果遇到了 <code>undefined reference to MPI_XXXX</code>
+的错误，还必须添加 OPENMPI 的头文件和库 <a
+href="#refer-anchor-3"><sup>[3]</sup></a> <figure class="highlight awk"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 添加头文件路径（或者你的 openmpi 安装路径）</span></span><br><span class="line"><span class="regexp">/usr/</span>lib<span class="regexp">/openmpi/i</span>nclude</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加库路径（或者你的 openmpi 安装路径）</span></span><br><span class="line"><span class="regexp">/usr/</span>lib<span class="regexp">/openmpi/</span>lib</span><br><span class="line"><span class="comment"># 链接选项 </span></span><br><span class="line">-lmpi</span><br></pre></td></tr></table></figure> 如果没有安装
+OPENMPI 的话，需要安装一下，使用
+<code>sudo apt-get install openmpi</code>，但是需要注意版本。</p>
+<p>如果遇到了
+<code>undefined reference to symbol 'udev_device_unref@@LIBUDEV_183'</code>
+的问题，需要添加 <code>libudev.so</code>。用 <code>locate libudev</code>
+找到路径，然后添加库路径 <figure class="highlight awk"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 路径 </span></span><br><span class="line"><span class="regexp">/usr/</span>lib/x86_64-linux-gnu</span><br><span class="line"><span class="comment"># 链接选项 </span></span><br><span class="line">-ludev</span><br></pre></td></tr></table></figure></p>
+<p>如果遇到了
+<code>undefined reference to symbol '__atomic_fetch_xor_16@@LIBATOMIC_1.0'</code>，需要添加
+<figure class="highlight ldif"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 链接选项 </span></span><br><span class="line"><span class="literal">-</span>latomic</span><br></pre></td></tr></table></figure></p>
+<p>如果遇到了
+<code>undefined reference to '_gfortran_concat_string'</code>，需要添加
+<figure class="highlight ldif"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 链接选项 </span></span><br><span class="line"><span class="literal">-</span>lgfortran</span><br></pre></td></tr></table></figure></p>
+<p>如果遇到了
+<code>undefined reference to XSetForeground (Maybe Some Drawing Functions)</code>，需要添加
+<figure class="highlight ldif"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 链接选项 </span></span><br><span class="line"><span class="literal">-</span>lX11</span><br></pre></td></tr></table></figure></p>
 <h1 id="参考">参考</h1>
 <div id="refer-anchor-1">
 
@@ -359,7 +394,13 @@ BLAS/LAPACK 安装<i class="fa fa-external-link-alt"></i></span>
 
 </div></li>
 <li>[2] <span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vYmFieWNsYXNzL3AvMTYzNTg1ODkuaHRtbA==">非
-ROOT 路径安装 BLAS/LAPACK<i class="fa fa-external-link-alt"></i></span></li>
+ROOT 路径安装 BLAS/LAPACK<i class="fa fa-external-link-alt"></i></span>
+<div id="refer-anchor-3">
+
+</div></li>
+<li>[3] <a
+href="https://blog.csdn.net/thj_2017720/article/details/118528324">undefined
+reference to `MPI_Init‘ 解决办法</a></li>
 </ul>
 ]]></content>
       <categories>
