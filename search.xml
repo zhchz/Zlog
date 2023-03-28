@@ -400,7 +400,7 @@ ROOT 路径安装 BLAS/LAPACK<i class="fa fa-external-link-alt"></i></span>
 </div></li>
 <li>[3] <a
 href="https://blog.csdn.net/thj_2017720/article/details/118528324">undefined
-reference to `MPI_Init‘ 解决办法</a></li>
+reference to MPI_Init 解决办法</a></li>
 </ul>
 ]]></content>
       <categories>
