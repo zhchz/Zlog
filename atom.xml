@@ -6,7 +6,7 @@
   <link href="https://zrzfh.github.io/Zlog/atom.xml" rel="self"/>
   
   <link href="https://zrzfh.github.io/Zlog/"/>
-  <updated>2023-03-28T09:33:48.974Z</updated>
+  <updated>2023-04-03T08:45:57.981Z</updated>
   <id>https://zrzfh.github.io/Zlog/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>机器学习基础（一）概率论</title>
+    <link href="https://zrzfh.github.io/Zlog/probability/"/>
+    <id>https://zrzfh.github.io/Zlog/probability/</id>
+    <published>2023-04-03T08:06:15.000Z</published>
+    <updated>2023-04-03T08:45:57.981Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="引言">引言</h1><p>不确定性可以说是在用数学工具对世界进行建模和认知的时候不可回避的问题，也是机器学习中的一个最基本的概念。于是，我们需要对这种不确定性进行量化和计算，而概率论能够为此提供一个合理的框架。所以，概率论是机器学习中最重要的基础理论之一，这也是本文要详细梳理概率论的基础知识的出发点。如果再辅之以其他工具如决策论、线性代数、微积分等，还能够在让我们构建世界观的同时，有切实可用的方法论。</p><span id="more"></span><p>本文会尽可能全面的列出机器学习中涉及到概率论的重要的基础的公理、定理、推理、定义、算法等，给出重要的公式、流程，但不会涉及证明和详细推导过程，作为梳理和备用，适用于入门和需要快速了解相关原理的情形，渴望更深层次的理解和探讨，建议系统的阅读相关资料书籍。</p><h1 id="随机变量与概率">随机变量与概率</h1><p>首先，我们简单的回顾一下随机事件、随机变量、概率等基本的概念。</p><h2 id="随机事件和随机变量">随机事件和随机变量</h2><p>对于不总是出现同一个结果的现象，我们称之为 <strong> 随机现象 </strong>，随机现象所有的可能结果组成了<strong> 样本空间 </strong>，而样本空间中的一个或者几个点集被称为<strong> 随机事件</strong>，通常使用<span class="math inline">\(A, B, C, ...\)</span> 等大写字母表示。</p><p>于是，用于表示随机事件的结果的数学变量，被称作 <strong> 随机变量</strong>，在一般数学表达上使用<span class="math inline">\(X, Y, Z\)</span>这样的大写字母。随机变量可以用来表示随机事件或者随机事件的组合，于是涉及到了随机事件之间的关系和运算法则。</p><p>总的来说，随机事件的关系包括：<strong>包含关系 </strong>，<strong> 相等关系 </strong>，<strong> 互不相容</strong>。包含关系是指，事件<span class="math inline">\(A\)</span> 是事件 <spanclass="math inline">\(B\)</span> 的子集，<spanclass="math inline">\(A\)</span> 的发生必然导致 <spanclass="math inline">\(B\)</span> 的发生，用 <spanclass="math inline">\(A \subset B\)</span> 表示。相等关系是指，事件<span class="math inline">\(A\)</span> 和事件 <spanclass="math inline">\(B\)</span> 相互包含，用 <spanclass="math inline">\(A = B\)</span> 表示 。互不相容表示，事件 <spanclass="math inline">\(A\)</span> 和事件 <spanclass="math inline">\(B\)</span> 没有交集，<spanclass="math inline">\(A\)</span> 和 <spanclass="math inline">\(B\)</span> 不可能同时发生，用 <spanclass="math inline">\(A \cap B = \varnothing\)</span> 表示。</p><p>随机事件的运算法则包含 <strong> 并</strong>，<strong>交 </strong>，<strong> 差</strong>，<strong>余</strong>。并：事件<span class="math inline">\(A\)</span> 或者事件 <spanclass="math inline">\(B\)</span> 至少有一个发生，用 <spanclass="math inline">\(A \cup B\)</span> 表示；交：事件 <spanclass="math inline">\(A\)</span> 和事件 <spanclass="math inline">\(B\)</span> 同时发生，用 <spanclass="math inline">\(A \cap B\)</span> 表示；差：事件 <spanclass="math inline">\(A\)</span> 发生，且事件 <spanclass="math inline">\(B\)</span> 不发生，用减号 <spanclass="math inline">\(A - B\)</span> 表示；余：事件 <spanclass="math inline">\(A\)</span> 和事件 <spanclass="math inline">\(B\)</span> 只能有一个发生（其实就是非的意思），用<span class="math inline">\(A = \bar{B}\)</span>表示。以上运算都满足交换律、结合律和分配律，还满足德摩根定律（DeMorgan's laws），也称作反演律，没有什么神奇的，表达式是：<spanclass="math inline">\(\overline{A \cap B} = \bar{A} \cup\bar{B}\)</span>。</p><h2 id="概率">概率</h2><p>确定事件的概率，常用的方法有频率方法、古典方法、几何方法。</p><p>频率方法，是观察事件 <span class="math inline">\(A\)</span>大量重复实验，记录 <span class="math inline">\(A\)</span>出现的次数，也称作 <strong> 频数</strong>，频数与总实验数之比记作 <spanclass="math inline">\(A\)</span> 的概率，即 <spanclass="math inline">\(p(A) =\frac{n(A)}{N}\)</span>，实践表明随着实验次数的增加，该比值将稳定在真实值附近，但是受到实验次数不能无限进行的限制，该方法只能得到近似的估计值。</p><p>古典方法，是在经验的基础上，通过逻辑分析总结得到概率的计算表达式，基本的计算方法是利用事件<span class="math inline">\(A\)</span>在样本空间中所占有的个数与样本空间中所有样本点的个数之比计算 <spanclass="math inline">\(A\)</span> 的概率，也就是 <spanclass="math inline">\(P(A) = \frac{N_A}{N}\)</span>。</p><p>几何方法，利用几何工具的辅助，假设样本空间内各处是等可能的，有一个事件的可能充满某一子区域，然后就用这个子区域占整体区域的大小来表示这个区域代表的事件<span class="math inline">\(A\)</span> 的概率，写成 <spanclass="math inline">\(P(A) = \frac{S_A}{S}\)</span>。</p><p>此外，还有根据个人的经验和主观判断来定义事件发生的概率，俗话说就是凭感觉，当然这不能是玄学的范畴。</p><p>当然，概率有一些性质和计算规则。比如，<spanclass="math inline">\(P(\varnothing) = 0\)</span>，不可能事件的概率为0，<span class="math inline">\(P(\Omega) = 1\)</span>，<spanclass="math inline">\(\Omega\)</span> 是整个样本空间，必然事件的概率为1。</p><p>概率是可加的，例如若干个 <strong> 互不相容 </strong> 的事件 <spanclass="math inline">\(A_1, A_2, A_3, \cdots, A_n\)</span> 的概率之和为<span class="math display">\[P(A_{\sum}) = \sum_{i} P(A_i)\]</span></p><p>如果对于一般事件，那么就要使用加法公式了 <spanclass="math display">\[P(A \cup B) = P(A) + P(B) - P(A \cap B)\]</span>可以想象两个重叠了一部分的矩形，要求重叠的面积，那么对两个矩形面积求和后还要减去它们中间重叠的部分，这就是加法公式的意义。于是，自然的有一个不等式推论，即<span class="math inline">\(P(A \cup B) \leq P(A) + P(B)\)</span>。</p><h1 id="条件概率和独立性">条件概率和独立性</h1><p>正在写...</p><!-- ## 条件概率## 乘法公式## 贝叶斯公式## 全概率公式## 独立性## 马尔可夫性质# 随机变量和分布## 随机变量### 离散### 连续### 多维随机变量## 分布函数## 概率分布的数学特征## 期望## 方差## 协方差## 分位数## Jensen 不等式# 常用分布## 高斯分布## 其他常用分布# 大数定律和中心极限定理## 大数定律## 中心极限定理# 参数估计## 概率密度估计## 极大似然估计# 随机算法## 采样算法## 遗传算法## 蒙特卡洛算法# 信息论## 熵## 交叉熵## KL 散度 -->]]></content>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;引言&quot;&gt;引言&lt;/h1&gt;
+&lt;p&gt;不确定性可以说是在用数学工具对世界进行建模和认知的时候不可回避的问题，也是机器学习中的一个最基本的概念。于是，我们需要对这种不确定性进行量化和计算，而概率论能够为此提供一个合理的框架。所以，概率论是机器学习中最重要的基础理论之一，这也是本文要详细梳理概率论的基础知识的出发点。如果再辅之以其他工具如决策论、线性代数、微积分等，还能够在让我们构建世界观的同时，有切实可用的方法论。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="机器学习" scheme="https://zrzfh.github.io/Zlog/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
+    
+    
+    <category term="机器学习" scheme="https://zrzfh.github.io/Zlog/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="不确定性" scheme="https://zrzfh.github.io/Zlog/tags/%E4%B8%8D%E7%A1%AE%E5%AE%9A%E6%80%A7/"/>
+    
+    <category term="模式识别" scheme="https://zrzfh.github.io/Zlog/tags/%E6%A8%A1%E5%BC%8F%E8%AF%86%E5%88%AB/"/>
+    
+    <category term="概率论" scheme="https://zrzfh.github.io/Zlog/tags/%E6%A6%82%E7%8E%87%E8%AE%BA/"/>
+    
+  </entry>
   
   <entry>
     <title>Ubuntu 自定义路径下安装 SLEPc/PETSc 以及 BLAS/LAPACK 科学计算库</title>
