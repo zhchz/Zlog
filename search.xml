@@ -325,18 +325,76 @@ class="math display">\[P(A \cup B) = P(A) + P(B) - P(A \cap B)
 可以想象两个重叠了一部分的矩形，要求重叠的面积，那么对两个矩形面积求和后还要减去它们中间重叠的部分，这就是加法公式的意义。于是，自然的有一个不等式推论，即
 <span class="math inline">\(P(A \cup B) \leq P(A) + P(B)\)</span>。</p>
 <h1 id="条件概率和独立性">条件概率和独立性</h1>
+<h2 id="条件概率">条件概率</h2>
+<p><strong>条件概率 </strong> 的定义是在某一个事件 <span
+class="math inline">\(B\)</span> 发生的情况下，求另一个事件 <span
+class="math inline">\(A\)</span> 发生的概率，记作 <span
+class="math inline">\(P(A|B)\)</span>，定义为 <span
+class="math display">\[P(A|B) = \frac{P(AB)}{P(B)}
+\]</span> 其中重要的一点是 <span class="math inline">\(P(B) &gt;
+0\)</span>。 ## 乘法公式
+<strong>乘法公式 </strong> 可以直接从上式推导出，若 <span
+class="math inline">\(P(B) &gt; 0\)</span>，则 <span
+class="math display">\[P(AB) = P(B)P(A|B)
+\]</span> 在机器学习中，更为常见的是乘法公式的一般式子，设 <span
+class="math inline">\(P(A_1 A_2 A_3 \cdots A_{n-1}) &gt;
+0\)</span>，则有 <span class="math display">\[P(A_1 \cdots A_n) = P(A_1) P(A_2|A_1) P(A_3|A_1 A_2) \cdots P(A_n| A_1
+\cdots A_{n-1})
+\]</span></p>
+<h2 id="全概率公式">全概率公式</h2>
+<p><strong>全概率公式 </strong> 定义为 <span class="math display">\[P(A) = \sum_{i=1}^{n}{P(B_i)P(A|B_i)}
+\]</span> 其中，<span class="math inline">\(B_1, B_2 \cdots B_n\)</span>
+表示对一个样本空间的分割，也就是 <span class="math inline">\(B_1, B_2
+\cdots B_n\)</span> 是互不相容的。</p>
+<h2 id="贝叶斯公式">贝叶斯公式</h2>
+<p><strong>贝叶斯公式 </strong> 应该算是概率论中最重要的公式了，它可以帮助我们借助容易计算的概率去计算一些不那么容易计算的概率。其可以记作
+<span class="math display">\[P(B|A) = \frac{P(A|B)P(B)}{P(A)}
+\]</span> 更一般的表达式为 <span class="math display">\[p(B_i|A) = \frac{P(A|B_i)P(B_i)}{\sum_{j}{P(B_j)P(A|B_j)}}
+\]</span> 其中 <span class="math inline">\(i, j = 1, 2 \cdots
+n\)</span>，<span class="math inline">\(B_1, B_2 \cdots B_n\)</span>
+表示对一个样本空间的分割。</p>
+<h2 id="独立性">独立性</h2>
+<p><strong>独立性 </strong> 表示两个事件之间不是相互影响的，就称作这两个事件是 <strong> 相互独立 </strong> 的，如果有多个事件，当多个事件之间两两相互独立，才能称这些事件相互独立。如果两个事件是相互独立的，那么他们同时发生的概率可以直接由各自发生的概率相乘得到，记作
+<span class="math inline">\(P(AB)=P(A)P(B)\)</span>。</p>
+<h2 id="马尔可夫性质">马尔可夫性质</h2>
+<p><strong>马尔可夫性质 </strong> 也是机器学习中常用到的基本概念之一，它表示，一个随机过程的状态只跟当前状态有关，而跟过往的所有的状态都无关。用数学公式表达为
+<span class="math display">\[P(B_{n+1}|B_1, B_2 \cdots B_n) = P(B_{n+1} | B_n)
+\]</span></p>
+<h1 id="概率分布">概率分布</h1>
+<p>随机变量有 <strong> 连续随机变量 </strong> 和<strong>离散随机变量 </strong> 之分，那么相应的，用随机变量的 <strong> 分布函数 </strong> 来描述随机变量在所有取值上的概率，也有 <strong> 连续分布 </strong> 和<strong>离散分布 </strong> 之分。一般来说，分布函数表示的是概率，在整个自变量域内是单调的，而且还是非减的。针对连续的情况，更普遍的是用 <strong> 概率密度 </strong> 函数来描述概率的分布情况，对于概率密度的积分才得到概率本身（类比密度和质量的关系）。概率密度函数是非负的，而且在整个定义域上的积分之和一定等于
+1。在接下来的章节中，如果不加以特殊的说明，那么都是针对连续的情况
+而言。</p>
+<h2 id="常用的分布">常用的分布</h2>
+<p>在机器学习中，一些复杂的分布会使用一些简单的同时性质比较好的分布组合而成，因此，我们需要了解一些常用的简单的分布，其中最常见的应当是高斯分布了。</p>
+<h3 id="高斯分布">高斯分布</h3>
+<p><strong>高斯分布 </strong> 又叫做 <strong> 正太分布</strong>，记作 <span
+class="math inline">\(X \sim N(\mu, \sigma^2)\)</span>，也可以写成 <span
+class="math inline">\(p(x) \sim N(\mu, \sigma^2)\)</span>，其中 <span
+class="math inline">\(X\)</span> 表示随机变量，<span
+class="math inline">\(p(x)\)</span> 表示概率密度函数，其公式为 <span
+class="math display">\[p(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp{\frac{-(x - \mu)^2}{2\sigma^2}}
+\]</span> 其中，<span class="math inline">\(\mu\)</span> 表示均值，<span
+class="math inline">\(\sigma\)</span>
+为方差。<strong>标准高斯分布 </strong> 的参数为 <span
+class="math inline">\(\mu = 0\)</span>，<span
+class="math inline">\(\sigma =
+1\)</span>。高斯分布很好的性质，比如任意高斯分布可以由一个标准的高斯分布得到，记作
+<span class="math inline">\(p(x) \sim N(0,
+1)\)</span>，这个性质可是使得随机采样可以参与梯度下降的优化算法，是随机优化算法的基本用法之一。高斯分布的
+68.27% 的样本在平均值左右的一个标准差的范围内，95.45%
+的样本在平均值左右的两个标准差的范围内，而 99.73%
+的样本都分布在平均值左右的三个标准差的范围内。高斯分布能够对现实中很多问题进行建模，当问题非常复杂的时候，还能够使用不同的高斯分布组合成复杂的 <strong> 混合高斯分布 </strong> 来描述，其中每个组成部分之间的概率表示可以为均匀分布或者自定义的其他分布。</p>
+<h3 id="其他常用分布">其他常用分布</h3>
+<p>其他常见的分布有 <strong> 均匀分布</strong>，概率密度函数的数学表达为
+<span class="math display">\[p(x) = \left\{\begin{aligned}
+  &amp;\frac{1}{b-a} \qquad  a \leq x \leq b \\
+  &amp;0 \qquad \qquad other
+  \end{aligned}
+    \right.
+\]</span> 其他的还是有泊松分布，几何分布等等。</p>
+<h2 id="概率分布的数学特征">概率分布的数学特征</h2>
 <p>正在写...</p>
-<!-- ## 条件概率
-## 乘法公式
-## 贝叶斯公式
-## 全概率公式
-## 独立性
-## 马尔可夫性质
-
-# 随机变量和分布
-## 随机变量
-### 离散
-### 连续
+<!--
 ### 多维随机变量
 ## 分布函数
 ## 概率分布的数学特征
