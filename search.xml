@@ -393,20 +393,40 @@ class="math inline">\(\sigma =
     \right.
 \]</span> 其他的还是有泊松分布，几何分布等等。</p>
 <h2 id="概率分布的数学特征">概率分布的数学特征</h2>
+<h3 id="期望">期望</h3>
+<p><strong>期望 </strong> 的定义是随机分布的加权平均值，可以写作 <span
+class="math display">\[E(X) = \mathbb{E}_{p(x)}(\cdot) = \int_{-\infty}^{＋\infty}xp(x) \ dx
+\]</span> 其中 <span class="math inline">\(\cdot\)</span>
+表示常数，也就是求的是本身的期望，如果替换成函数 <span
+class="math inline">\(g(x)\)</span>
+则表示在这个函数下的期望，在积分中需要乘上这个函数的值，比如 <span
+class="math display">\[\mathbb{E}_{p(x)}(g(x)) = \int_{-\infty}^{+\infty}g(x)p(x) \ dx
+\]</span> 严格来说，<span class="math inline">\(g(x)\)</span>
+还需要满足处处可导、单调等一些好的数学性质，这里不做专门展开了，证明也不详细介绍了。如果这个积分不收敛，那么可以说期望不存在。</p>
+<h3 id="方差">方差</h3>
+<p><strong>方差 </strong> 表示的是随机分布偏离均值的程度，或者说是波动的大小。可以写作
+<span class="math display">\[Var(X) = \int_{-\infty}^{+\infty}(x - \mathbb{E}_{p(x)})^2p(x) \ dx
+\]</span> 方差有一个更加实用的性质是 <span class="math display">\[Var(X) = E(X^2) - (E(X)^2)
+\]</span> “平方的期望减去期望的平方”，可以在各种场合快速计算方差。</p>
+<h3 id="多维随机分布">多维随机分布</h3>
+<p>多维随机分布简单来说就是样本空间的维度扩升到了高维，于是随机变量成为了 <strong> 联合随机变量 </strong> 密度函数成为了 <strong> 联合分布函数 </strong>，表示每一维的随机事件一起发生的概率，在连续分布中，使用<strong> 联合密度函数 </strong> 刻画，一般来说使用向量的方式记录，如
+<span class="math inline">\(p(\boldsymbol{x})\)</span>，加粗的 <span
+class="math inline">\(\boldsymbol{x}\)</span>
+表示向量。通过联合密度函数，求联合分布函数，当然也是使用多重积分进行的。最常见的有二维联合分布，<span
+class="math inline">\(p(\boldsymbol{x},\boldsymbol{y})\)</span>，在计算机视觉里面很常用，比如使用二维高斯分布作滤波器进行滤波操作等等。如果固定其他维度，对于某一个维度进行积分，那么表示这个 <strong> 边缘分布</strong>，主要关注的就是对于某一个随机变量的分布。</p>
+<h3 id="协方差">协方差</h3>
+<p>在二维随机分布中还有一个重要的概念，<strong>协方差</strong>。协方差表示两个分量之间的相关性，定义如下
+<span class="math display">\[Cov(X,Y) = E[(X - E(X))(Y - E(Y))]
+\]</span> 如果为 0，则表示不相关，大于 0，是正相关，小于
+0，是负相关。由协方差还可以引出 <strong> 相关系数</strong>，定义如下 <span
+class="math display">\[Corr(X,Y) = \frac{Cov(X,Y)}{\sqrt{Var(X)Var(Y)}}
+\]</span>
+当然，在刻画两个变量的相关性的时候，还有更加丰富的方法，比如信息论中的互信息等，在下面会讲到。</p>
+<h2 id="jensen- 不等式">Jensen 不等式</h2>
 <p>正在写...</p>
 <!--
-### 多维随机变量
-## 分布函数
-## 概率分布的数学特征
-## 期望
-## 方差
-## 协方差
-## 分位数
-## Jensen 不等式
 
-# 常用分布
-## 高斯分布
-## 其他常用分布
+## Jensen 不等式
 
 # 大数定律和中心极限定理
 ## 大数定律
