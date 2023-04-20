@@ -395,17 +395,18 @@ class="math inline">\(\sigma =
 <h2 id="概率分布的数学特征">概率分布的数学特征</h2>
 <h3 id="期望">期望</h3>
 <p><strong>期望 </strong> 的定义是随机分布的加权平均值，可以写作 <span
-class="math display">\[E(X) = \mathbb{E}_{p(x)}(\cdot) = \int_{-\infty}^{＋\infty}xp(x) \ dx
+class="math display">\[E(X) = \mathbb{E}_{p(x)}[\cdot] = \int_{-\infty}^{＋\infty}xp(x) \ dx
 \]</span> 其中 <span class="math inline">\(\cdot\)</span>
 表示常数，也就是求的是本身的期望，如果替换成函数 <span
 class="math inline">\(g(x)\)</span>
 则表示在这个函数下的期望，在积分中需要乘上这个函数的值，比如 <span
-class="math display">\[\mathbb{E}_{p(x)}(g(x)) = \int_{-\infty}^{+\infty}g(x)p(x) \ dx
+class="math display">\[\mathbb{E}_{p(x)}[g(x)] = \int_{-\infty}^{+\infty}g(x)p(x) \ dx
 \]</span> 严格来说，<span class="math inline">\(g(x)\)</span>
 还需要满足处处可导、单调等一些好的数学性质，这里不做专门展开了，证明也不详细介绍了。如果这个积分不收敛，那么可以说期望不存在。</p>
 <h3 id="方差">方差</h3>
 <p><strong>方差 </strong> 表示的是随机分布偏离均值的程度，或者说是波动的大小。可以写作
-<span class="math display">\[Var(X) = \int_{-\infty}^{+\infty}(x - \mathbb{E}_{p(x)})^2p(x) \ dx
+<span class="math display">\[Var(X) = \int_{-\infty}^{+\infty}(x - \mathbb{E}_{p(x)}[\cdot])^2p(x) \
+dx
 \]</span> 方差有一个更加实用的性质是 <span class="math display">\[Var(X) = E(X^2) - (E(X)^2)
 \]</span> “平方的期望减去期望的平方”，可以在各种场合快速计算方差。</p>
 <h3 id="多维随机分布">多维随机分布</h3>
@@ -423,10 +424,53 @@ class="math display">\[Corr(X,Y) = \frac{Cov(X,Y)}{\sqrt{Var(X)Var(Y)}}
 \]</span>
 当然，在刻画两个变量的相关性的时候，还有更加丰富的方法，比如信息论中的互信息等，在下面会讲到。</p>
 <h2 id="jensen- 不等式">Jensen 不等式</h2>
+<p><strong>Jensen 不等式 </strong> 在机器学习中，常用在 KL-Divergence 或者
+Evidence Lower Bound
+的计算上。假设给定一个凸函数，如标准的二次函数，在上面作任意两点之间的割线，那么所得到的割线一定在函数的上方，这就是
+Jensen
+不等式的几何意义。它的定义是，对一平均做凸函数变换，会小于等于先做凸函数变换再平均，于是在使用概率密度函数时，我们可以得到
+<span class="math display">\[\begin{split}
+\phi (\int_{-\infty}^{+\infty} g(x) p(x) \ dx) &amp;\leq
+\int_{-\infty}^{+\infty} \phi(g(x)) p(x) \ dx \\
+\phi (\mathbb{E}_{p(x)}[g(x)]) &amp; \leq
+\mathbb{E}_{p(x)}[\phi(g(x))p(x)]
+\end{split}
+\]</span></p>
+<h1 id="大数定律和中心极限定理">大数定律和中心极限定理</h1>
+<h2 id="特征函数">特征函数</h2>
+<p>如果考虑将密度函数作傅里叶变换，可以得到 <span
+class="math display">\[\phi(t) = \int_{-\infty}^{+\infty} e^{itx} \ dx =
+\mathbb{E}_{p(x)}[e^{itx}]
+\]</span> 其中 <span class="math inline">\(i = \sqrt{-1}\)</span>
+为虚数单位。于是，傅里叶变化就是关于函数 <span
+class="math inline">\(g(x,t) = e^{itx}\)</span>
+的均值。密度函数的傅里叶变换有着许多用处，比如能把独立随机变量和的分布的卷积运算
+(积分运算) 转换成乘法运算，能把求分布的各阶原点矩 (积分运算)
+转换成微分运算，能把随机变量序列的极限分布转换成一般的函数极限问题，通常也把密度函数的傅里叶变换称作为概率密度分布的 <strong> 特征函数</strong>。</p>
+<p>特征函数有许多好的数学性质：</p>
+<p>1、 <span class="math inline">\(|\phi(t)| \leq \phi(0) =
+1\)</span><br />
+2、 <span class="math inline">\(\phi(-t)\)</span> 与 <span
+class="math inline">\(\phi(t)\)</span> 互为共轭，为 <span
+class="math inline">\(\phi(-t) = \overline{\phi(t)}\)</span><br />
+3、 概率分布的和的特征函数为特征函数的积，为 <span
+class="math inline">\(\phi_{p(x) + p(y)}(t) = \phi_{p(x)}(t) \cdot
+\phi_{p(y)}(t)\)</span><br />
+4、 设 <span class="math inline">\(\mathbb{E}[x^{l}]\)</span>
+存在，则其特征函数 <span class="math inline">\(\phi(t)\)</span> <span
+class="math inline">\(l\)</span> 次可导，且 <span
+class="math inline">\(\phi^{k}(0) = i^{k}
+\mathbb{E}[x^{l}]\)</span><br />
+5、 特征函数在 <span class="math inline">\((-\infty, +\infty)\)</span>
+一致连续<br />
+6、 特征函数是非负的<br />
+7、 特征函数是唯一的<br />
+</p>
+<!-- ## 大数定律
+
+** 大数定律 ** 用来说明或者描述概率是如何收敛到某一个“稳定”的值的。 -->
 <p>正在写...</p>
 <!--
-
-## Jensen 不等式
 
 # 大数定律和中心极限定理
 ## 大数定律
