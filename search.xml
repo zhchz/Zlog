@@ -385,13 +385,13 @@ class="math inline">\(\sigma =
 的样本在平均值左右的两个标准差的范围内，而 99.73%
 的样本都分布在平均值左右的三个标准差的范围内。高斯分布能够对现实中很多问题进行建模，当问题非常复杂的时候，还能够使用不同的高斯分布组合成复杂的 <strong> 混合高斯分布 </strong> 来描述，其中每个组成部分之间的概率表示可以为均匀分布或者自定义的其他分布。</p>
 <h3 id="其他常用分布">其他常用分布</h3>
-<p>其他常见的分布有 <strong> 均匀分布</strong>，概率密度函数的数学表达为
+<p>其他常见的分布有 <strong>均匀分布</strong>，概率密度函数的数学表达为
 <span class="math display">\[p(x) = \left\{\begin{aligned}
   &amp;\frac{1}{b-a} \qquad  a \leq x \leq b \\
   &amp;0 \qquad \qquad other
   \end{aligned}
     \right.
-\]</span> 其他的还是有泊松分布，几何分布等等。</p>
+\]</span></p>
 <h2 id="概率分布的数学特征">概率分布的数学特征</h2>
 <h3 id="期望">期望</h3>
 <p><strong>期望 </strong> 的定义是随机分布的加权平均值，可以写作 <span
@@ -424,9 +424,8 @@ class="math display">\[Corr(X,Y) = \frac{Cov(X,Y)}{\sqrt{Var(X)Var(Y)}}
 \]</span>
 当然，在刻画两个变量的相关性的时候，还有更加丰富的方法，比如信息论中的互信息等，在下面会讲到。</p>
 <h2 id="jensen- 不等式">Jensen 不等式</h2>
-<p><strong>Jensen 不等式 </strong> 在机器学习中，常用在 KL-Divergence 或者
-Evidence Lower Bound
-的计算上。假设给定一个凸函数，如标准的二次函数，在上面作任意两点之间的割线，那么所得到的割线一定在函数的上方，这就是
+<p><strong>Jensen
+不等式 </strong> 是一个常用的不等式，假设给定一个凸函数，如标准的二次函数，在上面作任意两点之间的割线，那么所得到的割线一定在函数的上方，这就是
 Jensen
 不等式的几何意义。它的定义是，对一平均做凸函数变换，会小于等于先做凸函数变换再平均，于是在使用概率密度函数时，我们可以得到
 <span class="math display">\[\begin{split}
@@ -436,7 +435,6 @@ Jensen
 \mathbb{E}_{p(x)}[\phi(g(x))p(x)]
 \end{split}
 \]</span></p>
-<h1 id="大数定律和中心极限定理">大数定律和中心极限定理</h1>
 <h2 id="特征函数">特征函数</h2>
 <p>如果考虑将密度函数作傅里叶变换，可以得到 <span
 class="math display">\[\phi(t) = \int_{-\infty}^{+\infty} e^{itx} \ dx =
@@ -464,31 +462,185 @@ class="math inline">\(\phi^{k}(0) = i^{k}
 5、 特征函数在 <span class="math inline">\((-\infty, +\infty)\)</span>
 一致连续<br />
 6、 特征函数是非负的<br />
-7、 特征函数是唯一的<br />
-</p>
-<!-- ## 大数定律
-
-** 大数定律 ** 用来说明或者描述概率是如何收敛到某一个“稳定”的值的。 -->
+7、 特征函数是唯一的</p>
+<h1 id="参数估计">参数估计</h1>
+<p>参数估计主要用于估计随机分布中的未知参数、未知参数的函数或者未知的特征数或函数等，在机器学习中，最广泛的应用主要在于估计设定的随机分布的参数，例如最大似然估计、最大化期望算法、贝叶斯估计等等。这里，我们主要回顾一下这些经典的算法。</p>
+<h2 id="最大似然估计">最大似然估计</h2>
+<p><strong>最大似然估计 </strong> 是根据已有的数据进行验证，使得所给定的模型和所估计的模型参数在所给的数据上得到最大的符合。如果我们已有模型，那么根据模型写出一致数据所发生的概率，成为似然函数，然后似然函数对参数求导，使之为
+0，那么就可以解出所的参数。用数学表示，记　<span
+class="math inline">\(p(x;\theta)\)</span>，<span
+class="math inline">\(\theta \in \Theta\)</span>, 其中 <span
+class="math inline">\(\theta\)</span>
+表示一个或多个未知参数，且其所有可能的取值空间用 <span
+class="math inline">\(\Theta\)</span> 表示。现在有一些列的观测数据 <span
+class="math inline">\(x_1, x_2, \cdots
+x_n\)</span>，那么似然函数可以写成 <span
+class="math inline">\(L(\theta;x_1, x_2, \cdots x_n)\)</span>，简记
+<span class="math inline">\(L(\theta)\)</span>，最大似然估计可以写成
+<span class="math display">\[\hat{\theta} = \arg\max_{\theta \in \Theta} L(\theta)
+\]</span></p>
+<h2 id="最大化数学期望">最大化数学期望</h2>
+<p><strong>最大化数学期望 </strong> 叫做 Expectation Maximization，简称 EM
+算法。EM
+算法是优化算法的一种，它的概率模型通常依赖于无法观测的隐变量，因此事实上我们是不能够直接求解方程的，也无法使用梯度下降的方式，于是它采用一种优化迭代的思想逼近最优。</p>
+<p>例如，我们需要估计学校中男生、女生的身高分布模型，通过随机抽样得到一些样本，但由于粗心导致男生和女生的样本混合在一起，并且无法区分了，也没有任何关于学校中男生、女生的人数分布模型的信息可供参考。</p>
+<p>如果能够区分男生、女生的样本，或者有先验的男生、女生的人数分布模型，那么我们完全可以使用最大似然估计，假设男女生身高分布都是高斯分布，那么对于男生的样本或者属于男生样本的概率，我们可以根据高斯分布写出所有样本都出现的概率，然后构造似然函数，似然函数就是以参数为未知变量，而样本为已知量，那么最后将似然函数对参数求导，并令倒数为
+0，即可求得最大似然估计的参数。</p>
+<p>但现在的问题是，我们无法区分男生、女生的样本，也就是说这里引入了一个无法求得的隐藏变量，它决定了男生还是女生的样本。于是这里使用
+EM
+算法。在这个例子中，首先初始化男生或者女生样本的身高分布的参数，然后估计每个样本更可能是属于男生还是女生，在当前估计下，使用最大似然估计当前数据下的参数，然后不断迭代直到参数稳定。</p>
+<p>上面通过例子比较感性的了解了 EM
+的算法思想，那么接下来通过数学工具严谨的推导一遍。假设现有一系列数学样本
+<span class="math inline">\(\boldsymbol{x} = \{x_1, x_2, \cdots x_n
+\}\)</span>，且有一系列对应的隐藏变量 <span
+class="math inline">\(\boldsymbol{z} = \{z_1, z_2, \cdots z_n
+\}\)</span> 来给出样本的一些特定信息，于是有 <span
+class="math inline">\(p(x) = \int_{z} p(x, z)\)</span>，设参数用 <span
+class="math inline">\(\theta\)</span>
+表示，现在我们写出这些样本的似然函数并取对数（将乘法拆成加法） <span
+class="math display">\[L(\theta | \boldsymbol{x}, \boldsymbol{z}) = \int_{i=1}^{n}{\log
+\int_{z_i} p(x_i, z_i|\theta)}
+\]</span></p>
+<p>如果我们将 <span class="math inline">\(Q_i(z_i)\)</span> 看成是 <span
+class="math inline">\(z_i\)</span>
+的分布，但这个分布目前是不知道的，于是我们可以对上式的右边部分进行变化得到
+<span class="math display">\[\begin{split}
+\int_{i=1}^{n}\log \int_{z_i} p(x_i, z_i|\theta) &amp;=
+\int_{i=1}^{n}\log \int_{z_i} Q_i(z_i) \frac{p(x_i,
+z_i|\theta)}{Q_i(z_i)} \\
+&amp; \geq \int_{i=1}^{n} \int_{z_i} Q_i(z_i) \log \frac{p(x_i,
+z_i|\theta)}{Q_i(z_i)}
+\end{split}
+\]</span> 上式中的不等号是使用 Jensen
+不等式的结果。所以，最后通过不断提高下界的方式，也就是不断求上式中不等号的右边的式子的最大值，并以此来逼近左侧的最大值。直观的理解方式是，先固定
+<span class="math inline">\(\theta\)</span>，优化 <span
+class="math inline">\(Q_i(z_i)\)</span>，使得下界达到最大，然后固定
+<span class="math inline">\(Q_i(z_i)\)</span>，优化 <span
+class="math inline">\(\theta\)</span>
+求似然函数的最大值，如此反复就能逼近最大的值，也对应了 EM 算法的 E
+步骤和 M 步骤。</p>
+<p>其中，不等式取等号的时候，是在 <span
+class="math inline">\(\frac{p(x_i, z_i|\theta)}{Q_i(z_i)}\)</span>
+这一项为常数的时候，此时 <span class="math inline">\(\log\)</span>
+在积分符号外侧或者内侧都不影响积分运算（求均值运算）。于是有 <span
+class="math display">\[p(x_i, z_i|\theta) = CQ_i(z_i)
+\]</span> 对两侧同时积分（关于 <span
+class="math inline">\(z_i\)</span>） <span class="math display">\[\int_{z_i}p(x_i, z_i|\theta) = C\int_{z_i}Q_i(z_i)
+\]</span> 其实，在给出 <span class="math inline">\(Q_i(z_i)\)</span>
+的时候，暗含了一个隐藏条件 <span
+class="math inline">\(\int_{z_i}Q_i(z_i) =
+1\)</span>，这样的构造能使得问题简化，于是 <span
+class="math inline">\(\int_{z_i}p(x_i, z_i|\theta) = C\)</span>
+也是常数。最后发现 <span class="math display">\[\begin{split}
+Q_i(z_i) &amp;= \frac{p(x_i, z_i|\theta)}{\int_{z_i}p(x_i, z_i|\theta)}
+\\
+&amp;= \frac{p(x_i, z_i|\theta)}{p(x_i|\theta)} \\
+&amp;= p(z_i|x_i, \theta)
+\end{split}
+\]</span> 是一个后验概率，所以计算 <span
+class="math inline">\(Q_i(z_i)\)</span> 的时候就是计算后验概率。</p>
+<h1 id="熵与 -kl- 散度">熵与 KL 散度</h1>
+<p>在机器学习中，经常使用的基本概念还有熵、KL 散度（Kullback–Leibler
+Divergence）等。接下来，我们再简单回顾一下这些基本概念和一些常用的数学技巧。</p>
+<h2 id="熵">熵</h2>
+<p><strong>熵 </strong> 通常是用来测量随机变量的不确定度的。设变量 <span
+class="math inline">\(x\)</span> 服从分布 <span
+class="math inline">\(p(x)\)</span>, 记作 <span class="math inline">\(x
+\sim p(x)\)</span>，那么随机变量 <span class="math inline">\(X\)</span>
+的熵 <span class="math inline">\(H(X)\)</span> 定义为 <span
+class="math display">\[H(X) = - \int_{x \in \mathcal{X}} p(x) \ log \
+p(x) \]</span></p>
+<p>当然，如果有一对随机变量服从联合分布，记作 <span
+class="math inline">\(x, y \sim ~
+p(x,y)\)</span>，那么 <strong> 联合熵</strong> <span
+class="math inline">\(H(X,Y)\)</span> 显然可以写作 <span
+class="math display">\[H(X, Y) = - \int_{x \in \mathcal{X}} \int_{y \in
+\mathcal{Y}}p(x, y) \ log \ p(x,y) \]</span></p>
+<p>这一对随机变量的 <strong> 条件熵</strong> <span
+class="math inline">\(H(Y|X)\)</span> 可以写成 <span
+class="math display">\[\begin{split}
+H(Y|X) &amp;= \int_{x \in \mathcal{X}} p(x) \ H(Y|X=x) \\
+&amp;= - \int_{x \in \mathcal{X}} p(x) \int_{y \in \mathcal{Y}} p(y|x) \
+log \ p(y|x) \\
+&amp;= - \int_{x \in \mathcal{X}} \int_{y \in \mathcal{Y}} p(x, y) \ log
+\ p(y|x)
+\end{split}
+\]</span></p>
+<p>其中，有个常用的定理链式法则 <span class="math display">\[\begin{split}
+H(X, Y) &amp;= H(X) + H(Y|X) \\
+H(X, Y|Z) &amp;= H(X|Z) + H(Y|X, Z)
+\end{split}
+\]</span></p>
+<h2 id="kl- 散度">KL 散度</h2>
+<p><strong>KL 散度</strong>（Kullback–Leibler Divergence,
+KLD）也称作相对熵，是用来测量两个分布之间的“距离”（或者称之为相似程度）。两个分布
+<span class="math inline">\(p(x), q(x)\)</span> 之间的 KL 散度定义为
+<span class="math display">\[\begin{equation}
+D_{KL}(p(x)||q(x)) = \int_{x \in \mathcal{X}} p(x)log\frac{p(x)}{q(x)}
+\end{equation}
+\]</span></p>
+<p>KL 散度的几个小性质：</p>
+<p>1、<span class="math inline">\(D_{KL}(p(x)||q(x)) \geq
+0\)</span>，</p>
+<p>2、<span class="math inline">\(D_{KL}(p(x)||q(x)) =
+0\)</span>，当且仅当 <span class="math inline">\(p(x) =
+q(x)\)</span>，</p>
+<p>3、<span class="math inline">\(D_{KL}(p(x)||q(x)) \neq
+D_{KL}(q(x)||p(x))\)</span>。</p>
+<h2 id="互信息与自信息">互信息与自信息</h2>
+<p>熵和 KL
+散度还联系到信息论中的自信息与互信息的概念，这里也简单介绍一下。</p>
+<h3 id="互信息">互信息</h3>
+<p><strong>互信息 </strong> 定义为，给定联合分布 <span
+class="math inline">\(p(x, y)\)</span> 和边缘分布 <span
+class="math inline">\(p(x), p(y)\)</span>， <span
+class="math display">\[\begin{equation}
+\begin{split}
+I(X; Y) &amp;= \int_{x \in \mathcal{X}} \int_{y \in \mathcal{Y}} p(x, y)
+\ log \ \frac{p(x,y)}{p(x)p(y)}  \\
+&amp;= D_{KL}(p(x,y)||p(x)p(y))
+\end{split}
+\label{midef}
+\end{equation}
+\]</span> <span class="math inline">\(I(X;Y)\)</span> 可以理解成联合分布
+<span class="math inline">\(p(x,y)\)</span> 与边缘分布乘积 <span
+class="math inline">\(p(x)p(y)\)</span> 之间的 KL
+散度。通过观察，可以将公式 <span
+class="math inline">\(\eqref{midef}\)</span> 进一步变化得到 <span
+class="math display">\[\begin{equation}
+\begin{split}
+I(X; Y) &amp;= \int_{x \in \mathcal{X}} \int_{y \in \mathcal{Y}} p(x, y)
+\ log \ \frac{p(x,y)}{p(x)p(y)}  \\
+&amp;= \int_{x \in \mathcal{X}} \int_{y \in \mathcal{Y}} p(x, y) \ log \
+\frac{p(x|y)}{p(x)}  \\
+&amp;= - \int_{x \in \mathcal{X}} \int_{y \in \mathcal{Y}} p(x, y) \ log
+\ p(x) + \int_{x \in \mathcal{X}} \int_{y \in \mathcal{Y}} p(x, y) \ log
+\ p(x|y)  \\
+&amp;= - \int_{x \in \mathcal{X}} p(x) \ log \ p(x) - \left(- \int_{x
+\in \mathcal{X}} \int_{y \in \mathcal{Y}} p(x, y) \ log \ p(x|y) \right)
+\\
+&amp;= H(X) - H(X|Y)
+\end{split}
+\label{mitra}
+\end{equation}
+\]</span> 这就是 KL 散度和熵之间的联系。</p>
+<h3 id="自信息">自信息</h3>
+<p>如果把公式 <span class="math inline">\(\eqref{mitra}\)</span> 中的
+<span class="math inline">\(Y\)</span> 随机变量替换成 <span
+class="math inline">\(X\)</span> 随机变量，就可以得到 <span
+class="math display">\[\begin{equation}
+I(X;X) =  H(X) - H(X|X) = H(X)
+\label{sidef}
+\end{equation}
+\]</span> 这被定义为自信息，从公式 <span
+class="math inline">\(\eqref{sidef}\)</span>
+来看，熵和自信息在某种程度上是一致的。</p>
+<!-- 其实在机器学习中，我们经常需要通过构造一个辅助的分布，用于简化问题，或者使得原本不能计算的过程能够计算（例如 $\log$ 函数内的积分），从而不能求解的问题可以求解（例如优化求解最大值转换成提升下界 ELBO，而其实不断提升下界 ELBO 等价于不断缩小两个分布之间的距离 KL 散度）。例如对于 EM 算法，我们还可以通过 KL 散度和 ELBO 的方式推导， -->
 <p>正在写...</p>
-<!--
-
-# 大数定律和中心极限定理
-## 大数定律
-## 中心极限定理
-
-# 参数估计
-## 概率密度估计
-## 极大似然估计
-
-# 随机算法
+<!-- # 随机算法
 ## 采样算法
 ## 遗传算法
-## 蒙特卡洛算法
-
-# 信息论
-## 熵
-## 交叉熵
-## KL 散度 -->
+## 蒙特卡洛算法 -->
 ]]></content>
       <categories>
         <category>机器学习</category>
