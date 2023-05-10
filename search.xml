@@ -13,164 +13,131 @@ MI）提供端到端的、无标签的、无监督的方式训练神经网络，
 <p>IIC
 建立在一个基本想法上，将单条数据经过简单并且不涉及材料本身畸变的仿射变化后，在变化前后的数据对中，同一个物体的描述应该（或者说必须）是一致的，当然，这里不包括物体上具体的细节。如果定义一个函数映射，将数据映射到某个空间（比如类别），那么只要通过优化，使得同一数据对在映射空间的各自输出能够保持一致就行了。</p>
 <h2 id="问题思路">问题思路</h2>
-<p>设 <span class="math inline">\(x, x^{\prime} \in \mathcal
-{X}\)</span> 是一对数据对，服从分布 <span class="math inline">\(p
-(x,x^\prime)\)</span>, 即 <span class="math inline">\(x, x^{\prime} \sim
-p (x, x^{\prime})\)</span>，IIC 的目的是学习得到一个映射 <span
-class="math inline">\(\Phi: \mathcal {X} \rightarrow \mathcal
-{Y}\)</span>，能够保持 <span class="math inline">\(x,
-x^{\prime}\)</span>
-两者之间共性（如含有的同一个物体），而忽略特定的细节（如物体上的具体细节信息），其中
-<span class="math inline">\(\mathcal {X}\)</span> 是样本集合，<span
-class="math inline">\(\mathcal {Y} = \{1, \dots,C\}\)</span>
+<p>设 <span class="math inline">\(x, x^{\prime} \in \mathcal{X}\)</span>
+是一对数据对，服从分布 <span
+class="math inline">\(p(x,x^\prime)\)</span>, 即 <span
+class="math inline">\(x, x^{\prime} \sim p(x, x^{\prime})\)</span>，IIC
+的目的是学习得到一个映射 <span class="math inline">\(\Phi: \mathcal{X}
+\rightarrow \mathcal{Y}\)</span>，能够保持 <span
+class="math inline">\(x, x^{\prime}\)</span>
+两者之间共性（如含有的同一个物体），而忽略特定的细节（如物体上的具体细节信息），其中<span
+class="math inline">\(\mathcal{X}\)</span>是样本集合，<span
+class="math inline">\(\mathcal{Y} = \{1, \dots,C\}\)</span>
 是有限集合。用数学语言描述，<span class="math inline">\(\Phi\)</span>
 可以通过 <strong>​最大化数据对在映射空间的互信息（MI）​</strong>
-得到，用公式表示为 <span class="math display">\[ \mathop
-{max}\limits_{\Phi} \ I (\Phi (x), \Phi (x^{\prime})) \]</span>
-通常来说，<span class="math inline">\(I (x)\)</span>
+得到，用公式表示为 <span class="math display">\[\mathop{max}\limits_{\Phi} \ I(\Phi(x), \Phi(x^{\prime})) \]</span>
+通常来说，<span class="math inline">\(I(x)\)</span>
 中已经包含了熵（Entropy），可以避免模型退化（Degeneracy），可以认为，含有熵的模型不至于直接收缩到某一个点上。此处，<span
-class="math inline">\(\Phi\)</span> 可以是一个神经网络，论文中使用
-“瓶颈（Bottleneck）” 结构，可用于忽略特定的细节。</p>
+class="math inline">\(\Phi\)</span>
+可以是一个神经网络，论文中使用“瓶颈（Bottleneck）”结构，可用于忽略特定的细节。</p>
 <h2 id="数学定义">数学定义</h2>
 <p>互信息（MI）是信息论中的基本概念，与之相对的还有自信息（Self-Information）。而熵（Entropy）和相对熵（Relative
 Entropy,
-RE）是与之相关且不可或缺的重要基础概念之一。在使用之前，我们来简单回顾一下这些基础概念。</p>
-<p>为了方便，下文约定：用 <span class="math inline">\(p (x)\)</span>
-专门指代随机变量 <span class="math inline">\(X:\mathcal {X} \rightarrow
-\mathbb {R}\)</span> 的概率密度函数，<span
-class="math inline">\(\mathcal {X}\)</span> 为样本空间，且 <span
-class="math inline">\(x \in \mathcal
-{X}\)</span>。以此类推，指代同一个随机变量的相关参数或者变量，会使用同一个字母的不同字体表示。例如需要注意到
-<span class="math inline">\(p (x)\)</span> 和 <span
-class="math inline">\(p (y)\)</span> 分别指代两个随机变量 <span
-class="math inline">\(X\)</span> 和 <span
-class="math inline">\(Y\)</span>
-的概率密度函数。而且，在本文中对于离散随机变量和连续随机变量不加以区分，公式中都使用离散随机变量表示。如果使用连续随机变量，那么需要把求和符号替换成积分符号。</p>
-<h3 id="熵entropy">熵（Entropy）</h3>
-<p>在信息论中，熵（Entropy）是用来测量随机变量的不确定度的，设变量 <span
-class="math inline">\(x\)</span> 服从分布 <span class="math inline">\(p
-(x)\)</span>, 记作 <span class="math inline">\(x \sim p
-(x)\)</span>，那么随机变量 <span class="math inline">\(X\)</span>
-的熵（Entropy）<span class="math inline">\(H (X)\)</span> 定义为 <span
-class="math display">\[ H (X) = - \sum_{x \in \mathcal {X}} p (x) \ log
-\ p (x) \]</span></p>
-<p>当然，如果有一对随机变量服从联合分布，记作 <span
-class="math inline">\(x, y \sim ~ p (x,y)\)</span>，那么联合熵（Joint
-Entropy） <span class="math inline">\(H (X,Y)\)</span> 显然可以写作
-<span class="math display">\[ H (X, Y) = - \sum_{x \in \mathcal {X}}
-\sum_{y \in \mathcal {Y}} p (x, y) \ log \ p (x,y) \]</span></p>
-<p>这一对随机变量的条件熵（Conditional Entropy）<span
-class="math inline">\(H (Y|X)\)</span> 可以写成 <span
-class="math display">\[
-\begin {split}
-H (Y|X) &amp;= \sum_{x \in \mathcal {X}} p (x) \ H (Y|X=x) \\
-&amp;= - \sum_{x \in \mathcal {X}} p (x) \sum_{y \in \mathcal {Y}} p
-(y|x) \ log \ p (y|x) \\
-&amp;= - \sum_{x \in \mathcal {X}} \sum_{y \in \mathcal {Y}} p (x, y) \
-log \ p (y|x)
-\end {split}
-\]</span></p>
-<p>其中，有个常用的定理链式法则（Chain Rule） <span
-class="math display">\[
-\begin {split}
-H (X, Y) &amp;= H (X) + H (Y|X) \\
-H (X, Y|Z) &amp;= H (X|Z) + H (Y|X, Z)
-\end {split}
-\]</span></p>
-<h3 id="相对熵re">相对熵（RE）</h3>
-<p>相对熵（RE）是用来测量两个分布之间的
-“距离”（或者称之为相似程度），也可称为 KL 散度（Kullback–Leibler
-Divergence, KLD）。两个分布 <span class="math inline">\(p (x), q
-(x)\)</span> 之间的 KL 散度（KLD） 定义为 <span class="math display">\[
-\begin {equation}
-D_{KL}(p (x)||q (x)) = \sum_{x \in \mathcal {X}} p (x) log\frac {p
-(x)}{q (x)}
-\end {equation}
-\]</span></p>
-<p>KL 散度（KLD）的几个小性质：</p>
-<p>1、<span class="math inline">\(D_{KL}(p (x)||q (x)) \geq
-0\)</span>，</p>
-<p>2、<span class="math inline">\(D_{KL}(p (x)||q (x)) =
-0\)</span>，当且仅当 <span class="math inline">\(p (x) = q
-(x)\)</span>，</p>
-<p>3、<span class="math inline">\(D_{KL}(p (x)||q (x)) \neq D_{KL}(q
-(x)||p (x))\)</span>。</p>
-<h3 id="互信息mi">互信息（MI）</h3>
-<p>接下来给出互信息（MI）的定义。给定联合分布 <span
-class="math inline">\(p (x, y)\)</span> 和边缘分布 <span
-class="math inline">\(p (x), p (y)\)</span>，互信息（MI）<span
-class="math inline">\(I (X; Y)\)</span> 定义为 <span
-class="math display">\[
-\begin {equation}
-\begin {split}
-I (X; Y) &amp;= \sum_{x \in \mathcal {X}} \sum_{y \in \mathcal {Y}} p
-(x, y) \ log \ \frac {p (x,y)}{p (x) p (y)}  \\
-&amp;= D_{KL}(p (x,y)||p (x) p (y))
-\end {split}
-\label {midef}
-\end {equation}
-\]</span> <span class="math inline">\(I (X;Y)\)</span>
-可以理解成联合分布 <span class="math inline">\(p (x,y)\)</span>
-与边缘分布乘积 <span class="math inline">\(p (x) p (y)\)</span> 之间的
-KL 散度（KLD）。通过观察，可以将公式 <span class="math inline">\(\eqref
-{midef}\)</span> 进一步变化得到 <span class="math display">\[
-\begin {equation}
-\begin {split}
-I (X; Y) &amp;= \sum_{x \in \mathcal {X}} \sum_{y \in \mathcal {Y}} p
-(x, y) \ log \ \frac {p (x,y)}{p (x) p (y)}  \\
-&amp;= \sum_{x \in \mathcal {X}} \sum_{y \in \mathcal {Y}} p (x, y) \
-log \ \frac {p (x|y)}{p (x)}  \\
-&amp;= - \sum_{x \in \mathcal {X}} \sum_{y \in \mathcal {Y}} p (x, y) \
-log \ p (x) + \sum_{x \in \mathcal {X}} \sum_{y \in \mathcal {Y}} p (x,
-y) \ log \ p (x|y)  \\
-&amp;= - \sum_{x \in \mathcal {X}} p (x) \ log \ p (x) - \left (-
-\sum_{x \in \mathcal {X}} \sum_{y \in \mathcal {Y}} p (x, y) \ log \ p
-(x|y) \right) \\
-&amp;= H (X) - H (X|Y)
-\end {split}
-\label {mitra}
-\end {equation}
-\]</span> 这就是互信息（MI）和熵（Entropy）之间的联系。</p>
-<h3 id="自信息self-information">自信息（Self-Information）</h3>
-<p>如果把公式 <span class="math inline">\(\eqref {mitra}\)</span> 中的
-<span class="math inline">\(Y\)</span> 随机变量替换成 <span
-class="math inline">\(X\)</span> 随机变量，就可以得到 <span
-class="math display">\[
-\begin {equation}
-I (X;X) =  H (X) - H (X|X) = H (X)
-\label {sidef}
-\end {equation}
-\]</span> 这被定义为自信息（Self-Information），从公式 <span
-class="math inline">\(\eqref {sidef}\)</span>
-来看，熵（Entropy）和自信息（Self-Information）在某种程度上是一致的。</p>
+RE）是与之相关且不可或缺的重要基础概念之一。在使用之前，我们来简单回顾一下这些基础概念，参考另一篇文章 <a href="/Zlog/probability/" title="机器学习基础（一）概率论"> 机器学习基础（一）概率论第六节（熵与 KL 散度）</a>。</p>
+<!-- 为了方便，下文约定：用 $p(x)$ 专门指代随机变量 $X:\mathcal{X} \rightarrow \mathbb{R}$ 的概率密度函数，$\mathcal{X}$ 为样本空间，且 $x \in \mathcal{X}$。以此类推，指代同一个随机变量的相关参数或者变量，会使用同一个字母的不同字体表示。例如需要注意到 $p(x)$ 和 $p(y)$ 分别指代两个随机变量 $X$ 和 $Y$ 的概率密度函数。而且，在本文中对于离散随机变量和连续随机变量不加以区分，公式中都使用离散随机变量表示。如果使用连续随机变量，那么需要把求和符号替换成积分符号。
+
+### 熵（Entropy）
+在信息论中，熵（Entropy）是用来测量随机变量的不确定度的，设变量 $x$ 服从分布 $p(x)$, 记作 $x \sim p(x)$，那么随机变量 $X$ 的熵（Entropy）$H(X)$ 定义为
+$$ H(X) = - \sum_{x \in \mathcal{X}} p(x) \ log \ p(x) $$
+
+当然，如果有一对随机变量服从联合分布，记作 $x, y \sim ~ p(x,y)$，那么联合熵（Joint Entropy） $H(X,Y)$ 显然可以写作
+$$ H(X, Y) = - \sum_{x \in \mathcal{X}} \sum_{y \in \mathcal{Y}}p(x, y) \ log \ p(x,y) $$ 
+
+这一对随机变量的条件熵（Conditional Entropy）$H(Y|X)$ 可以写成
+$$
+\begin{split}
+H(Y|X) &= \sum_{x \in \mathcal{X}} p(x) \ H(Y|X=x) \\
+&= - \sum_{x \in \mathcal{X}} p(x) \sum_{y \in \mathcal{Y}} p(y|x) \ log \ p(y|x) \\
+&= - \sum_{x \in \mathcal{X}} \sum_{y \in \mathcal{Y}} p(x, y) \ log \ p(y|x)
+\end{split}
+$$
+
+其中，有个常用的定理链式法则（Chain Rule）
+$$
+\begin{split}
+H(X, Y) &= H(X) + H(Y|X) \\
+H(X, Y|Z) &= H(X|Z) + H(Y|X, Z)
+\end{split}
+$$
+
+### 相对熵（RE）
+相对熵（RE）是用来测量两个分布之间的“距离”（或者称之为相似程度），也可称为 KL 散度（Kullback–Leibler Divergence, KLD）。两个分布 $p(x), q(x)$ 之间的 KL 散度（KLD） 定义为
+$$
+\begin{equation}
+D_{KL}(p(x)||q(x)) = \sum_{x \in \mathcal{X}} p(x)log\frac{p(x)}{q(x)}
+\end{equation}
+$$
+
+KL 散度（KLD）的几个小性质：
+
+1、$D_{KL}(p(x)||q(x)) \geq 0$，
+
+2、$D_{KL}(p(x)||q(x)) = 0$，当且仅当 $p(x) = q(x)$，
+
+3、$D_{KL}(p(x)||q(x)) \neq D_{KL}(q(x)||p(x))$。
+
+
+
+### 互信息（MI）
+接下来给出互信息（MI）的定义。给定联合分布 $p(x, y)$ 和边缘分布 $p(x), p(y)$，互信息（MI）$I(X; Y)$ 定义为
+$$ 
+\begin{equation}
+\begin{split}
+I(X; Y) &= \sum_{x \in \mathcal{X}} \sum_{y \in \mathcal{Y}} p(x, y) \ log \ \frac{p(x,y)}{p(x)p(y)}  \\
+&= D_{KL}(p(x,y)||p(x)p(y))
+\end{split}
+\label{midef}
+\end{equation}
+$$
+$I(X;Y)$ 可以理解成联合分布 $p(x,y)$ 与边缘分布乘积 $p(x)p(y)$ 之间的 KL 散度（KLD）。通过观察，可以将公式 $\eqref{midef}$ 进一步变化得到
+$$
+\begin{equation}
+\begin{split}
+I(X; Y) &= \sum_{x \in \mathcal{X}} \sum_{y \in \mathcal{Y}} p(x, y) \ log \ \frac{p(x,y)}{p(x)p(y)}  \\
+&= \sum_{x \in \mathcal{X}} \sum_{y \in \mathcal{Y}} p(x, y) \ log \ \frac{p(x|y)}{p(x)}  \\
+&= - \sum_{x \in \mathcal{X}} \sum_{y \in \mathcal{Y}} p(x, y) \ log \ p(x) + \sum_{x \in \mathcal{X}} \sum_{y \in \mathcal{Y}} p(x, y) \ log \ p(x|y)  \\
+&= - \sum_{x \in \mathcal{X}} p(x) \ log \ p(x) - \left(- \sum_{x \in \mathcal{X}} \sum_{y \in \mathcal{Y}} p(x, y) \ log \ p(x|y) \right) \\
+&= H(X) - H(X|Y) 
+\end{split}
+\label{mitra}
+\end{equation}
+$$
+这就是互信息（MI）和熵（Entropy）之间的联系。
+
+### 自信息（Self-Information）
+如果把公式 $\eqref{mitra}$ 中的 $Y$ 随机变量替换成 $X$ 随机变量，就可以得到
+$$
+\begin{equation}
+I(X;X) =  H(X) - H(X|X) = H(X)
+\label{sidef}
+\end{equation}
+$$
+这被定义为自信息（Self-Information），从公式 $\eqref{sidef}$ 来看，熵（Entropy）和自信息（Self-Information）在某种程度上是一致的。 -->
 <h2 id="具体方式">具体方式</h2>
 <p>论文考虑使用软聚类（soft clustering），因此将输出 <span
-class="math inline">\(\Phi (x) \in [0, 1]^C\)</span>
-表示成一个离散分布，即 <span class="math inline">\(p (z=c|x) = {\Phi}_c
-(x)\)</span>，于是一对变量 <span class="math inline">\(x,
+class="math inline">\(\Phi(x) \in [0, 1]^C\)</span>
+表示成一个离散分布，即 <span class="math inline">\(p(z=c|x) =
+{\Phi}_c(x)\)</span>，于是一对变量 <span class="math inline">\(x,
 x^\prime\)</span> 的输出结果 <span class="math inline">\(z,
-z^\prime\)</span> 可以表示成一个联合分布： <span class="math display">\[
-P (z=c, z^\prime=c^\prime|x, x^\prime) = {\Phi}_c (x) \cdot {\Phi}_c
-(x^\prime)
+z^\prime\)</span> 可以表示成一个联合分布： <span class="math display">\[P(z=c, z^\prime=c^\prime|x, x^\prime) = {\Phi}_c(x) \cdot
+{\Phi}_c(x^\prime)
 \]</span> 实际上，<span class="math inline">\(z, z^\prime\)</span>
 不是独立的，而且还是强相关的。在数据集（实际处理是
 batch）上进行边缘化得到一个联合分布 <span
 class="math inline">\(P\)</span>, <span class="math inline">\(P\)</span>
 使用矩阵表示，大小为 <span class="math inline">\([C \times
-C]\)</span>，于是其中元素可以写成 <span class="math display">\[
-\begin {equation}
-P_{cc^\prime} = \frac {1}{n}\sum_{i=1}^{n}\Phi (x_i)\cdot\Phi
-({x_i}^\prime)^T
-\label {matdef}
-\end {equation}
+C]\)</span>，于是其中元素可以写成 <span class="math display">\[\begin{equation}
+P_{cc^\prime} =
+\frac{1}{n}\sum_{i=1}^{n}\Phi(x_i)\cdot\Phi({x_i}^\prime)^T
+\label{matdef}
+\end{equation}
 \]</span> 且一般来说将 <span class="math inline">\(P\)</span> 用 <span
 class="math inline">\((P+P^T)/2\)</span> 构造成一个对称矩阵。其中，<span
-class="math inline">\(P_c=P (z=c)\)</span> 和 <span
-class="math inline">\(P_{c^\prime}=P (z^\prime=c^\prime)\)</span>
+class="math inline">\(P_c=P(z=c)\)</span> 和 <span
+class="math inline">\(P_{c^\prime}=P(z^\prime=c^\prime)\)</span>
 能够直接通过矩阵中相应的行或列累加得到。最终，得到互信息（MI）的表达式：
-<span class="math display">\[
-I (z,z^\prime) = I (P) = \sum_{c=1}^{C}\sum_{c^\prime=1}^{C}
-P_{cc^\prime} \cdot ln \ \frac {P_{cc^\prime}}{P_{c} P_{c^\prime}}
+<span class="math display">\[I(z,z^\prime) = I(P) = \sum_{c=1}^{C}\sum_{c^\prime=1}^{C}P_{cc^\prime}
+\cdot ln \ \frac{P_{cc^\prime}}{P_{c}P_{c^\prime}}
 \]</span> 作为目标函数（Objective Function）。</p>
 <h3 id="图像聚类">图像聚类</h3>
 <p>在图像聚类中，考虑对采样 <span class="math inline">\(x\)</span>
@@ -183,52 +150,48 @@ class="math inline">\(gx\)</span> 即可。</p>
 <p>在图像分割中，由于需要对每个像素都进行划分，所以要对图像进行分块（patch），并且要利用块之间的空间位置信息。于是，需要给目标函数（Objective
 Function）增加局部空间不变性（Local Spatial
 Invariance）。具体的，如果给定一张 RGB 图像 <span
-class="math inline">\(x\in \mathbb {R}^{3 \times H \times W}\)</span>,
+class="math inline">\(x\in \mathbb{R}^{3 \times H \times W}\)</span>,
 <span class="math inline">\(u \in \Omega = \{1, \ldots, H\} \times \{1,
 \ldots, W\}\)</span> 表示一个像素位置，<span
 class="math inline">\(x_u\)</span> 是以 <span
 class="math inline">\(u\)</span> 为中心的一个块（patch）。假设现存在一个
-<span class="math inline">\(t \in T \subset \mathbb {Z}^2\)</span>，使得
+<span class="math inline">\(t \in T \subset \mathbb{Z}^2\)</span>，使得
 <span class="math inline">\(u+t\)</span> 为 <span
 class="math inline">\(u\)</span> 的领域，那么可以构成一对数据 <span
-class="math inline">\(\Phi (x_u), \Phi
-(x_{u+t})\)</span>，而它们可以直接从 <span class="math inline">\(\eqref
-{matdef}\)</span>
+class="math inline">\(\Phi(x_u),
+\Phi(x_{u+t})\)</span>，而它们可以直接从 <span
+class="math inline">\(\eqref{matdef}\)</span>
 所表示的矩阵中按列读取，因为自始至终都只用了一个神经网络映射 <span
 class="math inline">\(\Phi\)</span>。</p>
-<p>记 <span class="math inline">\(\Phi (x_u) = \Phi_u
-(x)\)</span>，那么它对应的另一个数据应为 <span
-class="math inline">\(\Phi_{g
-(u)}(gx)\)</span>，因为坐标也因为随机扰动已经变化了。如果以坐标变化前参考，那么可以写成
-<span class="math inline">\(\Phi_{g (u)}(gx) = {\big [ g^{-1} \Phi (gx)
-\big ]}_u\)</span>。因此，<span class="math inline">\(\Phi_u
-(x)\)</span> 和 <span class="math inline">\({\big [ g^{-1} \Phi (gx)
-\big ]}_u\)</span> 构成一对数据对，也就是说只要在 <span
-class="math inline">\(\Phi_u (gx)\)</span> 的基础上再进行一次 <span
-class="math inline">\(g^{-1}\)</span> 逆变换，就可以构成原 <span
-class="math inline">\(\Phi_u (x)\)</span>
+<p>记 <span class="math inline">\(\Phi(x_u) =
+\Phi_u(x)\)</span>，那么它对应的另一个数据应为 <span
+class="math inline">\(\Phi_{g(u)}(gx)\)</span>，因为坐标也因为随机扰动已经变化了。如果以坐标变化前参考，那么可以写成
+<span class="math inline">\(\Phi_{g(u)}(gx) = {\big [ g^{-1} \Phi(gx)
+\big ]}_u\)</span>。因此，<span class="math inline">\(\Phi_u(x)\)</span>
+和 <span class="math inline">\({\big [ g^{-1} \Phi(gx) \big
+]}_u\)</span> 构成一对数据对，也就是说只要在 <span
+class="math inline">\(\Phi_u(gx)\)</span> 的基础上再进行一次 <span
+class="math inline">\(g^{-1}\)</span>逆变换，就可以构成原 <span
+class="math inline">\(\Phi_u(x)\)</span>
 的数据对。于是，现在给出图像分割的目标函数： <span
-class="math display">\[
-\begin {equation}
-\begin {split}
-\frac {1}{|T|}\sum_{t \in T} I (\Phi_u (x);g^{-1}\Phi_u (gx)) &amp;=
-\frac {1}{|T|}\sum_{t \in T} I (P_t) \\
-&amp;= \frac {1}{|T|}\sum_{t \in T} I (\frac
-{1}{n|G||\Omega|}\sum_{i=1}^{n}\sum_{g \in G}\sum_{u \in \Omega}\Phi_u
-(x_i) \cdot \big [ g^{-1} \Phi (gx_i) \big ]^{T}_{u+t})
-\end {split}
-\label {sodef}
-\end {equation}
+class="math display">\[\begin{equation}
+\begin{split}
+\frac{1}{|T|}\sum_{t \in T} I(\Phi_u(x);g^{-1}\Phi_u(gx)) &amp;=
+\frac{1}{|T|}\sum_{t \in T} I(P_t) \\
+&amp;= \frac{1}{|T|}\sum_{t \in T}
+I(\frac{1}{n|G||\Omega|}\sum_{i=1}^{n}\sum_{g \in G}\sum_{u \in
+\Omega}\Phi_u(x_i) \cdot \big [g^{-1} \Phi(gx_i) \big ]^{T}_{u+t})
+\end{split}
+\label{sodef}
+\end{equation}
 \]</span> 其中，第一个求和符号表示对 <span
-class="math inline">\(i=1,\ldots,n\)</span> 个图像（实际指得是
-batch）进行求和，第二个求和符号表示对于任意的随机变化进行求和，第三个求和符号表示对每张图像中的块进行求和。论文原文中，把最后一个求和部分看成了
+class="math inline">\(i=1,\ldots,n\)</span>
+个图像（实际指得是 batch）进行求和，第二个求和符号表示对于任意的随机变化进行求和，第三个求和符号表示对每张图像中的块进行求和。论文原文中，把最后一个求和部分看成了
 Convolution（为什么？）。然后根据最大化目标函数，求解最优的 <span
 class="math inline">\(\Phi\)</span>。</p>
 <h1 id="总结">总结</h1>
 <p>IIC
-最大的优点之一应该就是避免了大量的数据标注问题，能够提供一个无监督的方式对图像进行语义级别的分割。作者很巧妙的使用了随机变换生成的数据对中两者的互信息（MI），似乎更像是一种
-“差分”
-的方式。其中，作者还提到该模型能够很好避免模型退化。论文的想法非常值得学习，对于不同分布的相似程度的评价以及映射函数，似乎还能有更好的优化，不知道增加一些惩罚项能否进一步增强模型能力，另外使用更强的映射转换模型（transformer）是否也能够进一步优化？</p>
+最大的优点之一应该就是避免了大量的数据标注问题，能够提供一个无监督的方式对图像进行语义级别的分割。作者很巧妙的使用了随机变换生成的数据对中两者的互信息（MI），似乎更像是一种“差分”的方式。其中，作者还提到该模型能够很好避免模型退化。论文的想法非常值得学习，对于不同分布的相似程度的评价以及映射函数，似乎还能有更好的优化，不知道增加一些惩罚项能否进一步增强模型能力，另外使用更强的映射转换模型（transformer）是否也能够进一步优化？</p>
 <p>论文地址：<a
 href="https://arxiv.org/abs/1807.06653">https://arxiv.org/abs/1807.06653</a><br />
 代码地址：<a
@@ -466,7 +429,8 @@ class="math inline">\(\phi^{k}(0) = i^{k}
 <h1 id="参数估计">参数估计</h1>
 <p>参数估计主要用于估计随机分布中的未知参数、未知参数的函数或者未知的特征数或函数等，在机器学习中，最广泛的应用主要在于估计设定的随机分布的参数，例如最大似然估计、最大化期望算法、贝叶斯估计等等。这里，我们主要回顾一下这些经典的算法。</p>
 <h2 id="最大似然估计">最大似然估计</h2>
-<p><strong>最大似然估计 </strong> 是根据已有的数据进行验证，使得所给定的模型和所估计的模型参数在所给的数据上得到最大的符合。如果我们已有模型，那么根据模型写出一致数据所发生的概率，成为似然函数，然后似然函数对参数求导，使之为
+<p><strong>最大似然估计 </strong> 叫做 Maximum Likelihood Estimation，简称
+MLE，是根据已有的数据进行验证，使得所给定的模型和所估计的模型参数在所给的数据上得到最大的符合。如果我们已有模型，那么根据模型写出一致数据所发生的概率，成为似然函数，然后似然函数对参数求导，使之为
 0，那么就可以解出所的参数。用数学表示，记　<span
 class="math inline">\(p(x|\theta)\)</span>，<span
 class="math inline">\(\theta \in \Theta\)</span>, 其中 <span
@@ -490,8 +454,8 @@ class="math display">\[\begin{split}
 \end{split}
 \]</span></p>
 <h2 id="最大化数学期望">最大化数学期望</h2>
-<p><strong>最大化数学期望 </strong> 叫做 Expectation Maximization，简称 EM
-算法。EM
+<p><strong>最大化数学期望 </strong> 叫做 Expectation Maximization，简称
+EM。EM
 算法是优化算法的一种，它的概率模型通常依赖于无法观测的隐变量，因此事实上我们是不能够直接求解方程的，也无法使用梯度下降的方式，于是它采用一种优化迭代的思想逼近最优。</p>
 <p>例如，我们需要估计学校中男生、女生的身高分布模型，通过随机抽样得到一些样本，但由于粗心导致男生和女生的样本混合在一起，并且无法区分了，也没有任何关于学校中男生、女生的人数分布模型的信息可供参考。</p>
 <p>如果能够区分男生、女生的样本，或者有先验的男生、女生的人数分布模型，那么我们完全可以使用最大似然估计，假设男女生身高分布都是高斯分布，那么对于男生的样本或者属于男生样本的概率，我们可以根据高斯分布写出所有样本都出现的概率，然后构造似然函数，似然函数就是以参数为未知变量，而样本为已知量，那么最后将似然函数对参数求导，并令倒数为
@@ -528,8 +492,7 @@ class="math inline">\(Q_i(z_i)\)</span>，使得下界达到最大，然后固�
 <span class="math inline">\(Q_i(z_i)\)</span>，优化 <span
 class="math inline">\(\theta\)</span>
 求似然函数的最大值，如此反复就能逼近最大的值，也对应了 EM 算法的 E
-步骤和 M 步骤。</p>
-<p>其中，不等式取等号的时候，是在 <span
+步骤和 M 步骤。其中，不等式取等号的时候，是在 <span
 class="math inline">\(\frac{p(x_i, z_i|\theta)}{Q_i(z_i)}\)</span>
 这一项为常数的时候，此时 <span class="math inline">\(\log\)</span>
 在积分符号外侧或者内侧都不影响积分运算（求均值运算）。于是有 <span
@@ -550,7 +513,9 @@ Q_i(z_i) &amp;= \frac{p(x_i, z_i|\theta)}{\int_{z_i}p(x_i, z_i|\theta)}
 \]</span> 是一个后验概率，所以计算 <span
 class="math inline">\(Q_i(z_i)\)</span> 的时候就是计算后验概率。</p>
 <h2 id="最大后验估计">最大后验估计</h2>
-<p>最大似然估计是频率学派的代表，而与之相对的贝叶斯学派的代表是 <strong> 最大后验估计</strong>。相比于最大似然估计，最大后验估计加入了参数的先验分布的假设，然后通过数据对齐进行调整。设
+<p>最大似然估计是频率学派的代表，而与之相对的贝叶斯学派的代表是 <strong> 最大后验估计</strong>，叫作
+Maximum a Posteriori
+estimation，简称 MAP。相比于最大似然估计，最大后验估计加入了参数的先验分布的假设，然后通过数据对齐进行调整。设
 <span class="math inline">\(p(x|\theta)\)</span>，<span
 class="math inline">\(\theta \in \Theta\)</span>, 其中 <span
 class="math inline">\(\theta\)</span>
@@ -670,12 +635,6 @@ I(X;X) =  H(X) - H(X|X) = H(X)
 \]</span> 这被定义为自信息，从公式 <span
 class="math inline">\(\eqref{sidef}\)</span>
 来看，熵和自信息在某种程度上是一致的。</p>
-<!-- 其实在机器学习中，我们经常需要通过构造一个辅助的分布，用于简化问题，或者使得原本不能计算的过程能够计算（例如 $\log$ 函数内的积分），从而不能求解的问题可以求解（例如优化求解最大值转换成提升下界 ELBO，而其实不断提升下界 ELBO 等价于不断缩小两个分布之间的距离 KL 散度）。例如对于 EM 算法，我们还可以通过 KL 散度和 ELBO 的方式推导， -->
-<p>正在写...</p>
-<!-- # 随机算法
-## 采样算法
-## 遗传算法
-## 蒙特卡洛算法 -->
 ]]></content>
       <categories>
         <category>机器学习</category>
