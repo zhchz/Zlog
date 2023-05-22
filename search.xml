@@ -337,7 +337,7 @@ class="math inline">\(X\)</span> 表示随机变量，<span
 class="math inline">\(p(x)\)</span> 表示概率密度函数，其公式为 <span
 class="math display">\[p(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp{\frac{-(x - \mu)^2}{2\sigma^2}}
 \]</span> 其中，<span class="math inline">\(\mu\)</span> 表示均值，<span
-class="math inline">\(\sigma\)</span>
+class="math inline">\(\sigma^2\)</span>
 为方差。<strong>标准高斯分布 </strong> 的参数为 <span
 class="math inline">\(\mu = 0\)</span>，<span
 class="math inline">\(\sigma =
@@ -355,6 +355,15 @@ class="math inline">\(\sigma =
   \end{aligned}
     \right.
 \]</span></p>
+<h3 id="复杂的分布">复杂的分布</h3>
+<p>事实上，现实里的数据都是服从一些非常复杂的分布，对它们需要进行建模分析，可以使用 <strong> 高斯混合模型</strong>，用于近似描述。高斯混合模型是多个高斯分布的线性集合，可以表示
+<span class="math display">\[p(x) = \sum_{i=1}^{k}\pi_i N(\mu_i, \sigma_i^2)
+\]</span> 其中，<span class="math inline">\(\pi_i\)</span> 表示第 <span
+class="math inline">\(i\)</span>
+个高斯分布的系数（或者也称作这个高斯分布出现的概率），而且满足 <span
+class="math inline">\(\sum_{i}\pi_i = 1\)</span>，<span
+class="math inline">\(\mu_i, \sigma_i^2\)</span> 表示第 <span
+class="math inline">\(i\)</span> 个高斯分布的均值和方差。</p>
 <h2 id="概率分布的数学特征">概率分布的数学特征</h2>
 <h3 id="期望">期望</h3>
 <p><strong>期望 </strong> 的定义是随机分布的加权平均值，可以写作 <span
