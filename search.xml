@@ -195,9 +195,7 @@ class="math inline">\(\Phi\)</span>。</p>
 <p>论文地址：<a
 href="https://arxiv.org/abs/1807.06653">https://arxiv.org/abs/1807.06653</a><br />
 代码地址：<a
-href="https://github.com/xu-ji/IIC">https://github.com/xu-ji/IIC</a><br />
-GitHub 上作者给出的代码用起来很不方便，还是以 python2 环境为主，仅支持
-GPU ... 挖个坑，优化一下代码的使用和环境配置...</p>
+href="https://github.com/xu-ji/IIC">https://github.com/xu-ji/IIC</a></p>
 ]]></content>
       <categories>
         <category>论文笔记</category>
@@ -822,5 +820,50 @@ reference to MPI_Init 解决办法</a></li>
         <tag>快速矩阵计算</tag>
         <tag>科学计算包</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>机器学习基础（二）近似推断</title>
+    <url>/Zlog/inference/</url>
+    <content><![CDATA[<h1 id="引言">引言</h1>
+<p>从给定的数据中去求解所产生数据的模型是机器学习的中心任务之一，但通常会有一些复杂的模型，总是阻碍我们精确的对它进行描述，或无法准确得出模型的方程，或无法对某几个方程求解，亦或是求解方程的代价太大以至于无法实现。于是，便有了一个用简单的模型去接近、模拟、近似复杂的模型，从而能够进行求解得到最终的近似模型，有能力已有的数据进行描述，这就是近似的方法。本文回顾机器学习中的基础的近似方法————变分推断（Variational
+Inference），这需要一定的关于概率的基础知识，如果有需要可以参考前一篇文章 <a href="/Zlog/probability/" title="机器学习基础（一）概率论"> 机器学习基础（一）概率论</a>。</p>
+<span id="more"></span>
+<h1 id="变分推断">变分推断</h1>
+<p>变分的方法主要起源于 18
+世纪欧拉、拉格朗日（两位神一般的存在）的研究。变分推断所解决的问题是，用一个分布
+<span class="math inline">\(q(x)\)</span> 去近似另一个复杂的分布 <span
+class="math inline">\(p(x)\)</span>，通常来说 <span
+class="math inline">\(p(x)\)</span> 是一个后验分布，记作 <span
+class="math inline">\(p(x|D)\)</span>，其中 <span
+class="math inline">\(D\)</span>
+表示给定的、已知的、观测到的数据。于是，上述问题可以被描述成 <span
+class="math display">\[\begin{equation}
+q^{*}(x) = \arg\min_{q \in Q} \mathcal{L} (q(x), p(x|D))
+\label{eqmin}
+\end{equation}
+\]</span> <span class="math inline">\(\mathcal{L}\)</span> 是一个衡量
+<span class="math inline">\(q(x)\)</span> 和 <span
+class="math inline">\(p(x|D)\)</span> 两个分布之间的距离的函数。</p>
+<h1 id="证据下界 -elbo">证据下界 ELBO</h1>
+<p>在变分推断中，<span class="math inline">\(\eqref{eqmin}\)</span> 中的
+<span class="math inline">\(\mathcal{L}\)</span> 函数可以使用 KL
+散度（Kullback–Leibler Divergence），也有其他的如 Wasserstein
+距离（Wasserstein Distance）等等。例如我们使用 KL 散度，代入 <span
+class="math inline">\(\eqref{eqmin}\)</span>，则可以得到 <span
+class="math display">\[\begin{equation}
+q^{*}(x) = \arg\min_{q \in Q} KL(q(x)||p(x|D))
+\end{equation}
+\]</span> 代入 KL 散度的公式可以得到 <span class="math display">\[\begin{equation}
+\begin{split}
+q^{*}(x) &amp;= \arg\min_{q \in Q} \int_x q(x) \log \frac{q(x)}{p(x|D)}
+\ dx \\
+&amp;= \arg\min_{q \in Q} \left[\int_x q(x) \log q(x) \ dx - \int_x
+q(x) \log p(x|D) \ dx \right ] \\
+&amp;=
+\end{split}
+\end{equation}
+\]</span></p>
+<!-- ** 证据下界 **(Evidence Lower Bound) 简称 ELBO， -->
+]]></content>
   </entry>
 </search>
