@@ -855,14 +855,38 @@ q^{*}(x) = \arg\min_{q \in Q} KL(q(x)||p(x|D))
 \end{equation}
 \]</span> 代入 KL 散度的公式可以得到 <span class="math display">\[\begin{equation}
 \begin{split}
-q^{*}(x) &amp;= \arg\min_{q \in Q} \int_x q(x) \log \frac{q(x)}{p(x|D)}
-\ dx \\
+q^{*}(x) &amp;= \arg\min_{q \in Q} KL(q(x)||p(x|D)) \\
+&amp;= \arg\min_{q \in Q} \int_x q(x) \log \frac{q(x)}{p(x|D)} \ dx \\
 &amp;= \arg\min_{q \in Q} \left[\int_x q(x) \log q(x) \ dx - \int_x
 q(x) \log p(x|D) \ dx \right ] \\
-&amp;=
+&amp;= \arg\min_{q \in Q} \left\{\mathbb{E}_{q(x)}\left[\log q(x)
+\right] - \mathbb{E}_{q(x)}\left[\log p(x|D) \right] \right\} \\
+&amp;= \arg\min_{q \in Q} \left\{\mathbb{E}_{q(x)}\left[\log q(x)
+\right] - \mathbb{E}_{q(x)}\left[\log p(x, D) \right] +
+\mathbb{E}_{q(x)}\left[\log p(D) \right] \right\} \\
+&amp;= \arg\min_{q \in Q} \left\{\mathbb{E}_{q(x)}\left[\log q(x)
+\right] - \mathbb{E}_{q(x)}\left[\log p(x, D) \right] + \log p(D)
+\right\}
 \end{split}
+\label{eqelbo}
 \end{equation}
-\]</span></p>
+\]</span> <span class="math inline">\(\eqref{eqelbo}\)</span>
+最后一行的最后一项是因为 <span class="math inline">\(\log p(D)\)</span>
+与期望的对象 <span class="math inline">\(q(x)\)</span>
+无关，是一个常数，因此可以去掉期望符号。而最后一行的前两项取一个负号就定义为
+<strong>证据下界</strong> (Evidence Lower Bound) 简称 ELBO，记作 <span
+class="math inline">\(-ELBO\)</span> <span class="math display">\[ELBO = \mathbb{E}_{q(x)}\left[\log p(x, D) \right] -
+\mathbb{E}_{q(x)}\left[\log q(x) \right]
+\]</span> 于是最小化 KL 散度，等价于最大化证据下界 ELBO。</p>
+<p>其实通过观察 <span class="math inline">\(\eqref{eqmin}\)</span>
+可以发现 KL 散度等于负的 ELBO 加上一个常数，写作 <span
+class="math display">\[KL(q(x)||p(x|D)) = \underbrace{\mathbb{E}_{q(x)}\left[\log q(x) \right]
+- \mathbb{E}_{q(x)}\left[\log p(x, D) \right]}_{-ELBO} + \log p(D)
+\]</span> 左右移项 <span class="math display">\[\log p(D) = KL(q(x)||p(x|D)) + ELBO
+\]</span> 因为 <span class="math inline">\(\log p(D)\)</span>
+为常数，<span class="math inline">\(KL(q(x)||p(x|D)) \geq
+0\)</span>，于是 <span class="math display">\[\log p(D) \geq ELBO
+\]</span> 这也是为什么 ELBO 被称之为证据下界的原因。</p>
 <!-- ** 证据下界 **(Evidence Lower Bound) 简称 ELBO， -->
 ]]></content>
   </entry>
