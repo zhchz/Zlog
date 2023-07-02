@@ -9,8 +9,9 @@
 <span id="more"></span>
 <h1 id="原理方法"> 原理方法 </h1>
 <p>STEGO 一言以蔽之：使用 Contrastive Loss
-提供了无监督的特征层面的聚类，就如原文中说的： <figure class="highlight livecodeserver"><table><tr><td class="code"><pre><span class="line">STEGO distills pretrained unsupervised visual features <span class="keyword">into</span> semantic clusters <span class="keyword">using</span> <span class="keyword">a</span> novel contrastive loss. </span><br></pre></td></tr></table></figure> Contrastive
-Loss
+提供了无监督的特征层面的聚类，就如原文中说的：
+<code>STEGO distills pretrained unsupervised visual features into semantic clusters using a novel contrastive loss.</code>
+Contrastive Loss
 最大化图像和它相近的样本（比如经过图像增强变换得到的旋转或者裁剪的新图像）的相似度，最小化图像和它相反的负样本（那些跟图像没有关系的随机图像），在目前能够在提供很好的性能，比其他一众方法都强。其中有例如
 IIC 和 PiCIE
 都最大化图像及其增强变换的特征之间的互信息，这就涉及到了需要在模型中首先提取特征的信息。STEGO
@@ -87,8 +88,8 @@ Random Correspondence。最后的 CRF
 设置很巧妙，通常来说如果特征已经具有显式的聚类（分割）的能力，那么在后端分割应该利用这个信息，并且在保持对应关系的同时，能够整体上加强这种能力。而且
 STEGO
 的结构非常灵活，能够使用任何特征提取的框架。相当于在后端增加了一个高性能的、稳定的分割头。</p>
-<p> 论文地址：<span class="exturl" data-url="aHR0cHM6Ly9hcnhpdi5vcmcvYWJzLzIyMDMuMDg0MTQ=">https://arxiv.org/abs/2203.08414<i class="fa fa-external-link-alt"></i></span>
-论文代码：<span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL21oYW1pbHRvbjcyMy9TVEVHTy90cmVlL21hc3Rlcg==">https://github.com/mhamilton723/STEGO/tree/master<i class="fa fa-external-link-alt"></i></span></p>
+<p> 论文地址：<span class="exturl" data-url="aHR0cHM6Ly9hcnhpdi5vcmcvYWJzLzIyMDMuMDg0MTQ=">https://arxiv.org/abs/2203.08414<i class="fa fa-external-link-alt"></i></span></p>
+<p> 论文代码：<span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL21oYW1pbHRvbjcyMy9TVEVHTy90cmVlL21hc3Rlcg==">https://github.com/mhamilton723/STEGO/tree/master<i class="fa fa-external-link-alt"></i></span></p>
 ]]></content>
       <categories>
         <category>论文笔记</category>
