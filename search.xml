@@ -813,6 +813,7 @@ q(x) \log p(x|D) \ dx \right ] \\
 为常数，<span class="math inline">\(KL(q(x)||p(x|D)) \geq
 0\)</span>，于是 <span class="math display">\[\log p(D) \geq ELBO
 \]</span> 这也是为什么 ELBO 被称之为证据下界的原因。</p>
+<p>正在写...</p>
 ]]></content>
   </entry>
 </search>

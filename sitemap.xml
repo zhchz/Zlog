@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://zrzfh.github.io/Zlog/STEGO/</loc>
+    <loc>https://zrzfh.github.io/Zlog/inference/</loc>
     
     <lastmod>2023-07-02</lastmod>
     
@@ -11,9 +11,9 @@
   </url>
   
   <url>
-    <loc>https://zrzfh.github.io/Zlog/inference/</loc>
+    <loc>https://zrzfh.github.io/Zlog/STEGO/</loc>
     
-    <lastmod>2023-06-27</lastmod>
+    <lastmod>2023-07-02</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
